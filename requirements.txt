@@ -1,0 +1,11 @@
+pandas
+numpy
+yfinance
+pyswisseph
+scikit-learn
+plotly
+streamlit
+fastapi
+uvicorn
+python-multipart
+pydantic

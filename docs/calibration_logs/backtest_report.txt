@@ -1,0 +1,32 @@
+
+==================================================
+100-YEAR CALIBRATED RESULTS (Threshold 6)
+==================================================
+Hit Rate (Accuracy):     56.58%
+Crash Capture (Recall):  50.00%
+Signal Trust (Precision):12.52%
+--------------------------------------------------
+True Positives: 64
+False Positives: 447
+Missed Crashes:  64
+
+DEEP DIVE: NOTABLE HISTORICAL CRASHES
+1931-08: Return -29.94% | Score: 7.8 | CAUGHT
+   Signals: Mars High Volatility (9.8), Jupiter Shield (Strong)
+1938-02: Return -25.04% | Score: 14.1 | CAUGHT
+   Signals: Mars High Volatility (7.1), Shani-Mangal Yoga, Graha Yudha (Mars-Saturn)
+1940-04: Return -23.95% | Score: 0.0 | MISSED
+   Signals: Mercury Debilitated (Pisces), Ganesha Yoga, Jupiter Shield (Strong)
+1932-04: Return -23.33% | Score: 16.2 | CAUGHT
+   Signals: Mercury Retrograde, Mars High Volatility (7.2), Jupiter Retrograde, Rahu Direct (Rare Karma), Angarak Yoga
+1987-09: Return -21.76% | Score: 3.0 | MISSED
+   Signals: Venus Debilitated (Virgo), Jupiter Retrograde
+1932-03: Return -20.25% | Score: 5.0 | MISSED
+   Signals: Mercury Debilitated (Pisces), Mercury Combust, Jupiter Retrograde
+1929-09: Return -19.93% | Score: 0.0 | MISSED
+1933-01: Return -18.44% | Score: 13.0 | CAUGHT
+   Signals: Mars High Volatility (8.0), Rahu Direct (Rare Karma), Grahan Yoga (Lunar)
+2008-09: Return -16.94% | Score: 6.0 | CAUGHT
+   Signals: Sun-Saturn Conjunction, Jupiter Debilitated (Capricorn), Jupiter Retrograde, Surya-Shani Yoga
+1930-05: Return -16.46% | Score: 2.0 | MISSED
+   Signals: Grahan Yoga (Solar)

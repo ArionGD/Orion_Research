@@ -1,0 +1,78 @@
+MEDINI 4-TIER RISK REPORT
+=========================
+
+CORRECTION (Tier 2)
+   Score Range: 4-8
+   Precision: 22.2%
+   Avg Return: 10.43%
+   Count: 153
+
+WARNING (Tier 3)
+   Score Range: 8-12
+   Precision: 22.8%
+   Avg Return: 15.66%
+   Count: 123
+
+CRITICAL (Tier 4)
+   Score Range: 12-100
+   Precision: 20.9%
+   Avg Return: 14.12%
+   Count: 661
+
+=========================
+FULL HISTORICAL CRASH ANALYSIS
+=========================
+Global Recall (Tier 3+4): 69.7%
+
+Severe Recall (>10% Drop): 70.2%
+
+1930-09: -75.95% | 🔴 CRITICAL (Tier 4) (Score 15.0)
+   Reasons: Koorma: Mars in Center, Mars OOB (Wild), Saturn Aspects Mars, Saturn Aspects Mercury, Mars Aspects Mercury, Mars Aspects Saturn
+1930-10: -73.85% | ❌ SAFE (Score 3.0)
+   Reasons: Saturn Aspects Sun, Jupiter Aspects Venus
+1930-08: -72.72% | 🔴 CRITICAL (Tier 4) (Score 23.0)
+   Reasons: Uranus Stationary (High Volatility), Koorma: Mars in Center, Saturn Aspects Jupiter, Jupiter Aspects Moon, Jupiter Aspects Saturn
+1930-05: -67.58% | 🔴 CRITICAL (Tier 4) (Score 15.3)
+   Reasons: Neptune Stationary (Trend Reversal/Illusion), Grahan Yoga (Solar)
+1930-04: -67.39% | 🔴 CRITICAL (Tier 4) (Score 29.8)
+   Reasons: Pluto Stationary (Systemic Threat), Grahan Yoga (Lunar), Saturn Aspects Mars, Mars Aspects Jupiter
+1930-07: -65.54% | ❌ SAFE (Score 2.0)
+   Reasons: Saturn Aspects Sun
+1930-11: -63.19% | 🔴 CRITICAL (Tier 4) (Score 24.0)
+   Reasons: Pluto Stationary (Systemic Threat), Saturn Aspects Moon, Mars Aspects Sun, Mars Aspects Mercury
+1931-06: -61.83% | 🔴 CRITICAL (Tier 4) (Score 14.0)
+   Reasons: Neptune Stationary (Trend Reversal/Illusion), Saturn Aspects Jupiter, Jupiter Aspects Saturn
+1931-02: -61.40% | 🔴 CRITICAL (Tier 4) (Score 18.0)
+   Reasons: Graha Yudha (Mercury-Saturn), Saturn Aspects Moon, Jupiter Aspects Mercury
+1931-03: -60.75% | 🟡 CORRECTION (Tier 2) (Score 4.5)
+   Reasons: Mars OOB (Wild), Mars Aspects Venus, Mars Aspects Mercury, Jupiter Aspects Sun
+1930-03: -60.66% | 🔴 CRITICAL (Tier 4) (Score 17.0)
+   Reasons: Graha Yudha (Mars-Mercury), Saturn Aspects Sun
+1930-06: -59.48% | 🟠 WARNING (Tier 3) (Score 8.6)
+   Reasons: Angarak Yoga, Saturn Aspects Venus
+1930-01: -57.39% | 🔴 CRITICAL (Tier 4) (Score 35.3)
+   Reasons: Mars OOB (Wild), Graha Yudha (Mars-Venus), Shani-Mangal Yoga
+1931-07: -57.39% | ❌ SAFE (Score 2.0)
+   Reasons: Mars Aspects True_Node, Jupiter Aspects Moon
+1929-09: -56.83% | ❌ SAFE (Score 0.0)
+1930-02: -55.20% | ❌ SAFE (Score 3.0)
+   Reasons: Saturn Aspects Moon, Jupiter Aspects Venus
+1931-04: -54.14% | 🔴 CRITICAL (Tier 4) (Score 28.8)
+   Reasons: Pluto Stationary (Systemic Threat), Grahan Yoga (Solar), Mars Aspects Venus
+1929-08: -52.41% | ❌ SAFE (Score 2.0)
+   Reasons: Saturn Aspects Venus
+2007-06: -51.10% | 🔴 CRITICAL (Tier 4) (Score 14.0)
+   Reasons: Neptune Stationary (Trend Reversal/Illusion), Jupiter Aspects Mars, Jupiter Aspects Sun, Jupiter Aspects Saturn
+1931-01: -50.09% | 🔴 CRITICAL (Tier 4) (Score 27.0)
+   Reasons: Uranus Stationary (High Volatility), Surya-Shani Yoga, Saturn Aspects Jupiter, Jupiter Aspects Mercury, Jupiter Aspects Saturn
+1931-05: -46.70% | 🔴 CRITICAL (Tier 4) (Score 20.0)
+   Reasons: USA: Mars triggers Rahu (Violence/panic), Neptune Stationary (Trend Reversal/Illusion)
+1936-07: -46.37% | 🔴 CRITICAL (Tier 4) (Score 28.1)
+   Reasons: Koorma: Mars in Center, Koorma: Ketu in Center, Mars OOB (Wild), Pisacha Yoga, Mars Aspects True_Node, Jupiter Aspects Mercury
+2007-05: -46.04% | 🟠 WARNING (Tier 3) (Score 9.5)
+   Reasons: Angarak Yoga, Mars Aspects Venus, Jupiter Aspects Venus, Jupiter Aspects Saturn
+1930-12: -45.31% | 🟠 WARNING (Tier 3) (Score 10.0)
+   Reasons: Neptune Stationary (Trend Reversal/Illusion)
+1973-01: -45.24% | 🔴 CRITICAL (Tier 4) (Score 42.2)
+   Reasons: Pluto Stationary (Systemic Threat), Koorma: Saturn in Center, Guru-Chandal Yoga, Grahan Yoga (Solar), Saturn Aspects Venus
+Broad Recall (Tier 2+): 84.0%

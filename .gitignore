@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.env
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.log
+*.tmp
+# Ignore local database exports if any
+# data/raw/*.csv
+# Only push essential datasets
