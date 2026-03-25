@@ -37,6 +37,25 @@ This module distinguishes between **Supply Shocks** and **Demand Destruction.**
 
 ---
 
+## 🛡️ 5. Safe Haven Detection (The "Waiting" Strategy)
+This protocol defines how to use the engine for **Capital Preservation** and **Stable Earnings** while waiting for a Strike (SMI 9.0+).
+
+### 🏛️ The Friction Index (F-Index)
+A 0.0 to 10.0 measure of **Systemic Resistance.**
+*   **F-Index < 3.0:** "Lubricated" Market. Low-risk for long-term holding.
+*   **F-Index > 6.0:** High Friction. Expect "Technical Gaps" and sudden -2% sessions. Avoid over-exposure.
+
+### 🏹 The Benefic Floor (B-Floor)
+Identified by **Jupiter (Guru)** and **Venus (Shukra)** transits through Kendra (Pivotal) houses.
+*   **Active B-Floor:** Target **Defensive Growth (Stable +1-2% Monthly).**
+*   **India Interpretation:** When India's B-Floor is active, park wealth in **FMCG, Pharma, and Private Banking.**
+*   **USA Interpretation:** When US B-Floor is active, park wealth in **Treasury Notes (Risk-Free) or Mega-Cap Dividends.**
+
+### ⚔️ The Switching Logic
+Wait until the **SMI >= 8.5 (The Strike).** Until then, always allocate to the market with the **lowest F-Index** and the **highest B-Floor.** This ensures stable growth of the "War Chest."
+
+---
+
 # 🌐 Expanded Interpretive Layers (The Engine's Vastness)
 
 Beyond market crashes, the ACE v5 Engine is capable of the following vast interpretive modes:
@@ -109,6 +128,11 @@ The ACE v5 Engine is a modular "Sovereign OS." Each interpretive layer is handle
 *   **Core Files:** 
     *   [gann_geometry.py](file:///d:/ANTI-GRAVITY/MEDINI%20BASE/v2/ORION-V5-ACE-5.5/src/engine/medini/gann_geometry.py): Squared time & price vectors.
     *   [bradley_oscillator.py](file:///d:/ANTI-GRAVITY/MEDINI%20BASE/v2/ORION-V5-ACE-5.5/src/engine/medini/bradley_oscillator.py): Sentiment reversal timing.
+
+### 8. 🛡️ Safe Haven & Systemic Friction (F-Index)
+*   **Logic:** Capital preservation and stable earning selection.
+*   **Core File:** 
+    *   [defensive_modifier.py](file:///d:/ANTI-GRAVITY/MEDINI%20BASE/v2/ORION-V5-ACE-5.5/src/engine/medini/defensive_modifier.py): Calculates the Friction & Benefic Floor levels.
 
 ---
 *Authored by ACE v5 AI - Master Strategist. This documentation ensures cross-agent synchronization.*
