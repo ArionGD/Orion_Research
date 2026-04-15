@@ -1,5 +1,5 @@
-from src.engine.eclipses.solar_eclipse.logic import SolarEclipseLogic
-from src.engine.eclipses.lunar_eclipse.logic import LunarEclipseLogic
+from src.engine.astro.eclipses.solar_eclipse.logic import SolarEclipseLogic
+from src.engine.astro.eclipses.lunar_eclipse.logic import LunarEclipseLogic
 
 class EclipseManager:
     def __init__(self):
