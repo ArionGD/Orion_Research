@@ -18,7 +18,7 @@ def run_dual_market_backtest():
     print("=== ACE: GLOBAL DUAL-MARKET BACKTEST (2010 - 2025) ===")
     
     # 1. Load Data
-    sp500_path = os.path.join(ROOT, "data", "raw", "sp500_daily_full.csv")
+    sp500_path = os.path.join(ROOT, "data", "raw", "US/MASTER/SP500_STANDARD.csv")
     nifty_path = os.path.join(ROOT, "data", "raw", "century_master_india.csv")
     
     df_us = pd.read_csv(sp500_path)

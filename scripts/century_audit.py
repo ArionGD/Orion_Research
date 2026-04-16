@@ -48,7 +48,7 @@ def run_century_audit():
     US_MOON = 348.0
     US_BIRTH = datetime(1957, 3, 4)
     
-    csv_path = os.path.join(ROOT, 'data', 'raw', 'sp500_daily_full.csv')
+    csv_path = os.path.join(ROOT, 'data', 'raw', 'US/MASTER/SP500_STANDARD.csv')
     df = pd.read_csv(csv_path, parse_dates=['Date'])
     df['Date'] = pd.to_datetime(df['Date'], utc=True).dt.tz_localize(None)
     df.set_index('Date', inplace=True)

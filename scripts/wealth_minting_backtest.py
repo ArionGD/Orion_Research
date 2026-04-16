@@ -27,7 +27,7 @@ def run_wealth_backtest():
     US_BIRTH = datetime(1957, 3, 4)
     
     # 2. Data
-    csv_path = os.path.join(ROOT, 'data', 'raw', 'sp500_daily_full.csv')
+    csv_path = os.path.join(ROOT, 'data', 'raw', 'US/MASTER/SP500_STANDARD.csv')
     df = pd.read_csv(csv_path, parse_dates=['Date'])
     df['Date'] = pd.to_datetime(df['Date'], utc=True).dt.tz_localize(None)
     df = df[(df['Date'] >= '1990-01-01') & (df['Date'] <= '2024-12-31')].copy()

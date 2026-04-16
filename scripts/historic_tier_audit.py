@@ -54,7 +54,7 @@ def run_historic_audit(name, start_y, end_y):
     US_BIRTH = datetime(1957, 3, 4)
     
     # 2. Load Data
-    csv_path = os.path.join(ROOT, 'data', 'raw', 'sp500_daily_full.csv')
+    csv_path = os.path.join(ROOT, 'data', 'raw', 'US/MASTER/SP500_STANDARD.csv')
     df = pd.read_csv(csv_path, parse_dates=['Date'])
     df['Date'] = pd.to_datetime(df['Date'], utc=True).dt.tz_localize(None)
     df = df[(df['Date'] >= f'{start_y}-01-01') & (df['Date'] <= f'{end_y}-12-31')].copy()
