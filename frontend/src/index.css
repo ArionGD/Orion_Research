@@ -1,32 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-:root {
-  --bg-dark: #090c10;
-  --panel-bg: #111622;
-  --card-bg: #171d2c;
-  --border-color: #212b3e;
-  --border-accent: #2e3c54;
-  --accent-gold: #f59e0b;
-  --accent-blue: #3b82f6;
-  --accent-purple: #a855f7;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
-  --text-primary: #f1f5f9;
-  --text-muted: #94a3b8;
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #080b11;
+    color: #f1f5f9;
+  }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* Custom Scrollbars */
@@ -35,16 +19,12 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: #080b11;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #1e2638;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-accent);
-}
-
-.mono {
-  font-family: 'JetBrains Mono', monospace;
+  background: #2e3c54;
 }
