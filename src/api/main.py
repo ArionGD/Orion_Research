@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 import sys
 import json
+import sqlite3
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -16,6 +17,7 @@ import urllib.error
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 VED_PATH = os.path.join(ROOT, 'ved_engine')
 FRONTEND_DIST = os.path.join(ROOT, 'frontend', 'dist')
+DB_PATH = os.path.join(ROOT, "chat_history.db")
 
 # Auto-load root .env file
 env_file = os.path.join(ROOT, '.env')
@@ -31,6 +33,36 @@ if ROOT not in sys.path:
     sys.path.append(ROOT)
 if VED_PATH not in sys.path:
     sys.path.append(VED_PATH)
+
+# Database Initialization
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            title TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id TEXT PRIMARY KEY,
+            session_id TEXT,
+            sender TEXT,
+            text TEXT,
+            metrics TEXT,
+            symbol TEXT,
+            engine TEXT,
+            timestamp TEXT,
+            FOREIGN KEY(session_id) REFERENCES sessions(id) ON DELETE CASCADE
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # Core Engine Imports
 try:
@@ -82,8 +114,13 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
+    session_id: Optional[str] = None
     api_key: Optional[str] = None
     history: Optional[List[ChatMessage]] = None
+
+class CreateSessionRequest(BaseModel):
+    session_id: str
+    title: Optional[str] = "New Conversation"
 
 ALIAS_MAP = {
     "ADANI PORT": "ADANIPORTS", "ADANI PORTS": "ADANIPORTS", "ADANIPORTS": "ADANIPORTS", "ADANI": "ADANIPORTS",
@@ -100,7 +137,7 @@ ALIAS_MAP = {
     "GOLD": "GOLD", "XAU": "GOLD", "SILVER": "SILVER", "XAG": "SILVER", "OIL": "OIL", "GAS": "OIL", "CRUDE": "OIL"
 }
 
-# Helper to call Google Gemini REST API with clean system_instruction and 4096 maxOutputTokens
+# Helper to call Google Gemini REST API
 def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list: List[ChatMessage], api_key: str):
     models_to_try = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
     last_err_msg = ""
@@ -172,20 +209,114 @@ async def health_check():
         "corporate_engine": "ONLINE" if corporate_engine else "OFFLINE",
         "mudra_ai": "GEMINI MULTI-TURN AGENT READY",
         "gemini_api_key_configured": bool(api_key),
+        "database": "SQLite Persistent Storage Online",
         "frontend": "React SPA (Vite)",
         "version": "5.5.0",
         "timestamp": datetime.now().isoformat()
     }
 
+# --- Database Session Management Endpoints ---
+
+@app.get("/api/v1/chat/sessions")
+async def list_chat_sessions():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, title, created_at, updated_at FROM sessions ORDER BY updated_at DESC")
+        rows = cursor.fetchall()
+        conn.close()
+
+        sessions = [{"id": r[0], "title": r[1], "created_at": r[2], "updated_at": r[3]} for r in rows]
+        return {"sessions": sessions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/chat/sessions")
+async def create_chat_session(req: CreateSessionRequest):
+    try:
+        now_str = datetime.now().isoformat()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR REPLACE INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)",
+                       (req.session_id, req.title, now_str, now_str))
+        conn.commit()
+        conn.close()
+        return {"status": "created", "session_id": req.session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/chat/sessions/{session_id}")
+async def get_session_messages(session_id: str):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, sender, text, metrics, symbol, engine, timestamp FROM messages WHERE session_id = ? ORDER BY timestamp ASC", (session_id,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        messages = []
+        for r in rows:
+            msg_dict = {
+                "id": r[0],
+                "sender": r[1],
+                "text": r[2],
+                "symbol": r[4],
+                "engine": r[5],
+                "timestamp": r[6]
+            }
+            if r[3]:
+                try:
+                    msg_dict["metrics"] = json.loads(r[3])
+                except Exception:
+                    pass
+            messages.append(msg_dict)
+        return {"session_id": session_id, "messages": messages}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/v1/chat/sessions/{session_id}")
+async def delete_chat_session(session_id: str):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
+        cursor.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+        conn.commit()
+        conn.close()
+        return {"status": "deleted", "session_id": session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Main Chat Endpoint with Persistent DB Saving ---
+
 @app.post("/api/v1/chat/mudra")
 async def mudra_ai_chat(req: ChatRequest):
     """
-    Mudra AI Context-Aware Agent powered directly by Gemini API.
+    Mudra AI Context-Aware Agent with Persistent Database Storage.
     """
     msg = req.message.strip()
     msg_upper = msg.upper()
     api_key = req.api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     history = req.history or []
+    session_id = req.session_id or f"session_{int(datetime.now().timestamp()*1000)}"
+
+    now_str = datetime.now().isoformat()
+
+    # Save Session & User Message to Database Silently
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        # Title snippet from first prompt if new session
+        title_snippet = msg[:40] + "..." if len(msg) > 40 else msg
+        cursor.execute("INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET updated_at=?",
+                       (session_id, title_snippet, now_str, now_str, now_str))
+        user_msg_id = f"user_{int(datetime.now().timestamp()*1000)}"
+        cursor.execute("INSERT OR REPLACE INTO messages (id, session_id, sender, text, timestamp) VALUES (?, ?, ?, ?, ?)",
+                       (user_msg_id, session_id, "user", msg, now_str))
+        conn.commit()
+        conn.close()
+    except Exception as err:
+        print("DB Save User Msg Exception:", err)
 
     # 1. Robust Alias Matcher on CURRENT message
     target_symbol = None
@@ -242,14 +373,17 @@ Active Planetary Aspects: Saturn-Rahu Conjunction, Jupiter Ingress in Taurus, So
 Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrological analyst. Answer user queries directly with comprehensive financial, technical, and astrological insights for the specific stock requested.
 """
 
+    reply_payload = None
+
     # Call Real Gemini API if Key is provided
     if api_key:
         gemini_reply, err_msg, used_model = call_gemini_api_multiturn(msg, system_context, history if not target_symbol else [], api_key)
         if gemini_reply:
-            return {
+            reply_payload = {
                 "symbol": target_symbol or "MARKET",
                 "reply": gemini_reply,
                 "engine": f"Gemini API ({used_model})",
+                "session_id": session_id,
                 "metrics": {
                     "smi_score": 7.80,
                     "micro_risk": 5.20 if not analysis else analysis['company_micro_risk'],
@@ -259,39 +393,56 @@ Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrologi
             }
         elif err_msg:
             if "credits are depleted" in err_msg or "429" in err_msg:
-                return {
+                reply_payload = {
                     "symbol": target_symbol or "MARKET",
                     "reply": f"### ⚠️ Google Gemini API Quota Notice\n\nGoogle API returned a quota limit error for this key:\n`{err_msg}`\n\n**To fix this & get unlimited live Gemini responses:**\n1. In [Google AI Studio](https://aistudio.google.com/app/apikey), generate a key under **Default Gemini Project** (which gives 1,500 free queries/day).\n2. Or link your GCP Billing Account to `project-ba753270-5762-47c5-ba6` in GCP Console.",
+                    "session_id": session_id,
                     "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GEMINI QUOTA LIMITED"}
                 }
 
-    # Dynamic Fallback
-    if target_symbol == "GOLD":
-        return {
-            "symbol": "GOLD",
-            "reply": "### 🪙 Mudra AI Deep Forensic Intelligence: Gold (XAU)\n\nGold consolidates between ₹1,60,000 – ₹1,65,000 during August eclipse windows, followed by a +10% to +14% breakout past ₹1,70,000 in September-October 2026.",
-            "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GOLD ANALYSIS ACTIVE"}
-        }
-
-    elif target_symbol in PRESET_COMPANIES and analysis:
-        return {
-            "symbol": target_symbol,
-            "company_name": analysis['company_name'],
-            "reply": f"### 🏗️ Mudra AI Forensic Intelligence: {analysis['company_name']} ({analysis['symbol']})\n\n- **Inception Date:** `{analysis['incorporation_date']}`\n- **Dual Risk Index:** `{analysis['dual_risk_index']} / 10`\n- **Outlook:** Transiting Mars in Gemini aligns with natal Sun/Jupiter, indicating port volume expansion toward 1st September 2026.",
-            "metrics": {
-                "smi_score": analysis['mundane_smi_score'],
-                "micro_risk": analysis['company_micro_risk'],
-                "dual_risk": analysis['dual_risk_index'],
-                "status": analysis['recipe_status']
+    if not reply_payload:
+        if target_symbol == "GOLD":
+            reply_payload = {
+                "symbol": "GOLD",
+                "reply": "### 🪙 Mudra AI Deep Forensic Intelligence: Gold (XAU)\n\nGold consolidates between ₹1,60,000 – ₹1,65,000 during August eclipse windows, followed by a +10% to +14% breakout past ₹1,70,000 in September-October 2026.",
+                "session_id": session_id,
+                "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GOLD ANALYSIS ACTIVE"}
             }
-        }
+        elif target_symbol in PRESET_COMPANIES and analysis:
+            reply_payload = {
+                "symbol": target_symbol,
+                "company_name": analysis['company_name'],
+                "reply": f"### 🏗️ Mudra AI Forensic Intelligence: {analysis['company_name']} ({analysis['symbol']})\n\n- **Inception Date:** `{analysis['incorporation_date']}`\n- **Dual Risk Index:** `{analysis['dual_risk_index']} / 10`\n- **Outlook:** Transiting Mars in Gemini aligns with natal Sun/Jupiter, indicating port volume expansion toward 1st September 2026.",
+                "session_id": session_id,
+                "metrics": {
+                    "smi_score": analysis['mundane_smi_score'],
+                    "micro_risk": analysis['company_micro_risk'],
+                    "dual_risk": analysis['dual_risk_index'],
+                    "status": analysis['recipe_status']
+                }
+            }
+        else:
+            reply_payload = {
+                "symbol": "MACRO",
+                "reply": f"### ✦ Mudra AI Sovereign Macro Intelligence\n\n**Query:** \"{msg}\"\n\n**SMI Weather:** `7.80 / 10 (STORM / HIGH VOLATILITY)`\nAugust 12 & 27 Eclipses on Aquarius/Leo Axis create short-term market consolidation before September expansion.",
+                "session_id": session_id,
+                "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "SOVEREIGN MACRO"}
+            }
 
-    else:
-        return {
-            "symbol": "MACRO",
-            "reply": f"### ✦ Mudra AI Sovereign Macro Intelligence\n\n**Query:** \"{msg}\"\n\n**SMI Weather:** `7.80 / 10 (STORM / HIGH VOLATILITY)`\nAugust 12 & 27 Eclipses on Aquarius/Leo Axis create short-term market consolidation before September expansion.",
-            "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "SOVEREIGN MACRO"}
-        }
+    # Save AI Response to Database Silently
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        ai_msg_id = f"ai_{int(datetime.now().timestamp()*1000)}"
+        metrics_json = json.dumps(reply_payload.get("metrics")) if reply_payload.get("metrics") else None
+        cursor.execute("INSERT OR REPLACE INTO messages (id, session_id, sender, text, metrics, symbol, engine, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                       (ai_msg_id, session_id, "ai", reply_payload.get("reply"), metrics_json, reply_payload.get("symbol"), reply_payload.get("engine"), now_str))
+        conn.commit()
+        conn.close()
+    except Exception as err:
+        print("DB Save AI Msg Exception:", err)
+
+    return reply_payload
 
 @app.get("/api/v1/commodities/forecast")
 async def get_commodity_forecast(commodity: str = "gold"):
