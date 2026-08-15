@@ -35,7 +35,14 @@ PRESET_COMPANIES = {
     "ONGC": {"name": "Oil & Natural Gas Corp Ltd", "date": "1956-08-14", "city": "Dehradun, India", "category": "Energy & Power", "sector": "Energy"},
     "BPCL": {"name": "Bharat Petroleum Corp Ltd", "date": "1952-01-24", "city": "Mumbai, India", "category": "Energy & Power", "sector": "Energy"},
     "NTPC": {"name": "NTPC Limited", "date": "1975-11-07", "city": "New Delhi, India", "category": "Energy & Power", "sector": "Power"},
-    "POWERGRID": {"name": "Power Grid Corp of India", "date": "1989-10-23", "city": "New Delhi, India", "category": "Energy & Power", "sector": "Power"}
+    "POWERGRID": {"name": "Power Grid Corp of India", "date": "1989-10-23", "city": "New Delhi, India", "category": "Energy & Power", "sector": "Power"},
+
+    # 🏗️ 5. Infrastructure, Ports & Conglomerates
+    "ADANIPORTS": {"name": "Adani Ports & SEZ Ltd", "date": "1998-05-26", "city": "Ahmedabad, India", "category": "Infrastructure", "sector": "Ports & Logistics"},
+    "TATAMOTORS": {"name": "Tata Motors Ltd", "date": "1945-09-27", "city": "Mumbai, India", "category": "Automobile", "sector": "Auto"},
+    "BHARTIARTL": {"name": "Bharti Airtel Ltd", "date": "1995-07-07", "city": "New Delhi, India", "category": "Telecom", "sector": "Telecom"},
+    "ITC": {"name": "ITC Limited", "date": "1910-08-24", "city": "Kolkata, India", "category": "FMCG", "sector": "FMCG"},
+    "LT": {"name": "Larsen & Toubro Ltd", "date": "1946-02-07", "city": "Mumbai, India", "category": "Infrastructure", "sector": "Engineering & Construction"}
 }
 
 SECTOR_ASTRO_MAP = {
