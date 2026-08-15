@@ -347,10 +347,10 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
       {/* Main Workspace Body with Slide-over Right Drawer */}
       <div className="flex-1 flex relative overflow-hidden z-10">
         {/* Main Chat Conversation Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 flex flex-col">
           {/* Welcome Screen when Empty */}
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-6 sm:space-y-8 py-8 sm:py-12 px-2">
+            <div className="my-auto flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-5 sm:space-y-6 py-4 px-2">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-purple-500/20 to-blue-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl sm:text-3xl shadow-2xl animate-pulse">
                 ✦
               </div>
@@ -528,8 +528,8 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
         </div>
       </div>
 
-      {/* Simple Clean Floating Input Bar */}
-      <div className="p-2.5 sm:p-4 z-10">
+      {/* Bottom Floating Prompt Bar */}
+      <div className="shrink-0 p-2.5 sm:p-4 bg-[#0e131f] border-t border-slate-800/80 z-20">
         <form
           onSubmit={(e) => {
             e.preventDefault();

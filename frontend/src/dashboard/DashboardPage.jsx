@@ -301,7 +301,7 @@ export default function DashboardPage({ onLogout }) {
       </aside>
 
       {/* Phone View Bottom Navigation Bar (5 Main Tabs) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-[#0e131f]/95 backdrop-blur-md border-t border-slate-800 flex items-center justify-around px-2 shadow-2xl select-none">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-20 bg-[#0e131f]/95 backdrop-blur-xl border-t border-slate-800 flex items-center justify-around px-3 shadow-2xl select-none">
         {[
           { id: 'mudra', label: 'Mudra AI', icon: Sparkles },
           { id: 'executive', label: 'Risk', icon: Activity },
@@ -318,21 +318,21 @@ export default function DashboardPage({ onLogout }) {
                 setActiveTab(item.id);
                 setMobileNavOpen(false);
               }}
-              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-2xl transition-all cursor-pointer ${
                 isActive
-                  ? 'text-amber-400 font-bold bg-amber-500/10 border border-amber-500/30'
+                  ? 'text-amber-400 font-bold bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/10'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400 scale-110' : 'text-slate-400'}`} />
-              <span className="text-[10px] font-mono leading-none">{item.label}</span>
+              <Icon className={`w-5 h-5 ${isActive ? 'text-amber-400 scale-110' : 'text-slate-400'}`} />
+              <span className="text-[11px] font-mono leading-none">{item.label}</span>
             </button>
           );
         })}
       </div>
 
       {/* Main Content Workspace with Bottom Padding for Mobile Bottom Bar */}
-      <main className={`flex-1 ${activeTab === 'mudra' ? 'h-[calc(100vh-4rem)] lg:h-screen overflow-hidden p-1 sm:p-4 pb-16 lg:pb-4' : 'h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-20 lg:pb-8'}`}>
+      <main className={`flex-1 ${activeTab === 'mudra' ? 'h-[calc(100vh-5rem)] lg:h-screen overflow-hidden p-1 sm:p-4 pb-20 lg:pb-4' : 'h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-8'}`}>
         {/* Render Mudra AI Full Screen */}
         {activeTab === 'mudra' && (
           <MudraAIChatPanel onToggleMobileNav={() => setMobileNavOpen(!mobileNavOpen)} />
