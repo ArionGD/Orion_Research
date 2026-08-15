@@ -100,49 +100,45 @@ ALIAS_MAP = {
     "GOLD": "GOLD", "XAU": "GOLD", "SILVER": "SILVER", "XAG": "SILVER", "OIL": "OIL", "GAS": "OIL", "CRUDE": "OIL"
 }
 
-# Helper to call Google Gemini REST API
+# Helper to call Google Gemini REST API with clean system_instruction and 4096 maxOutputTokens
 def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list: List[ChatMessage], api_key: str):
-    # Active Gemini models in v1beta
     models_to_try = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
     last_err_msg = ""
+
+    contents = []
+    if history_list:
+        for item in history_list[-8:]:
+            r = "user" if item.role in ["user", "human"] else "model"
+            contents.append({
+                "role": r,
+                "parts": [{"text": item.text}]
+            })
+
+    contents.append({
+        "role": "user",
+        "parts": [{"text": prompt_text}]
+    })
+
+    system_instruction_payload = {
+        "parts": [{
+            "text": f"You are Mudra AI, an expert agentic AI financial & mundane astrological analyst powered by ORION RESEARCH.\n\nSystem Context:\n{context_text}\n\nInstruction: Answer user queries directly with comprehensive financial, technical, and astrological insights. Always provide complete, fully fleshed out, non-truncated answers."
+        }]
+    }
 
     for model_name in models_to_try:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-            
-            contents = []
-            contents.append({
-                "role": "user",
-                "parts": [{"text": f"System Context (ORION RESEARCH ASTRO ENGINE):\n{context_text}"}]
-            })
-            contents.append({
-                "role": "model",
-                "parts": [{"text": "Understood. I am Mudra AI, an expert agentic AI financial & mundane astrological analyst powered by ORION RESEARCH. I will answer user queries concisely with context awareness."}]
-            })
-
-            if history_list:
-                for item in history_list[-6:]:
-                    r = "user" if item.role in ["user", "human"] else "model"
-                    contents.append({
-                        "role": r,
-                        "parts": [{"text": item.text}]
-                    })
-
-            contents.append({
-                "role": "user",
-                "parts": [{"text": prompt_text}]
-            })
-
             payload = {
+                "system_instruction": system_instruction_payload,
                 "contents": contents,
                 "generationConfig": {
                     "temperature": 0.4,
-                    "maxOutputTokens": 1500
+                    "maxOutputTokens": 4096
                 }
             }
             data = json.dumps(payload).encode('utf-8')
             req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
-            with urllib.request.urlopen(req, timeout=12) as response:
+            with urllib.request.urlopen(req, timeout=20) as response:
                 res_body = response.read().decode('utf-8')
                 res_json = json.loads(res_body)
                 candidates = res_json.get('candidates', [])
@@ -262,7 +258,6 @@ Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrologi
                 }
             }
         elif err_msg:
-            # If Google API returned an explicit error (e.g. 429 quota/billing depleted), surface it directly!
             if "credits are depleted" in err_msg or "429" in err_msg:
                 return {
                     "symbol": target_symbol or "MARKET",
