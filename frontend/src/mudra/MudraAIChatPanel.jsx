@@ -528,30 +528,30 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
         </div>
       </div>
 
-      {/* Bottom Floating Prompt Bar */}
-      <div className="shrink-0 p-2.5 sm:p-4 bg-[#0e131f] border-t border-slate-800/80 z-20">
+      {/* Bottom Gemini-Style Unified Single Capsule Input Bar */}
+      <div className="shrink-0 p-3 sm:p-4 bg-[#080b11] border-t border-slate-800/80 z-30">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="relative max-w-4xl mx-auto flex items-center gap-2"
+          className="max-w-4xl mx-auto flex items-center justify-between bg-[#141a28] border border-slate-700/80 focus-within:border-amber-500 rounded-full p-1.5 pl-5 shadow-lg transition-all"
         >
           <input
             type="text"
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
             placeholder="Ask Mudra AI (e.g. TCS, INFY, SBIN, Gold)..."
-            className="w-full bg-[#141a28] border border-slate-700/80 focus:border-amber-500 text-white placeholder-slate-500 text-xs font-mono px-4 py-3 rounded-xl outline-none transition-all shadow-inner"
+            className="w-full bg-transparent text-white placeholder-slate-500 text-xs font-mono outline-none pr-3"
           />
 
           <button
             type="submit"
             disabled={!inputMsg.trim() || loading}
             title="Send Message"
-            className={`p-3 rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center ${
+            className={`w-9 h-9 rounded-full transition-all cursor-pointer shrink-0 flex items-center justify-center shadow-md ${
               inputMsg.trim() && !loading
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 hover:scale-105'
+                ? 'bg-amber-500 text-slate-950 hover:scale-105 shadow-amber-500/20'
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed'
             }`}
           >
