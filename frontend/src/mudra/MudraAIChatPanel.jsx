@@ -12,16 +12,50 @@ import {
   ShieldAlert,
   BarChart3,
   Zap,
-  Cpu,
-  Key,
-  Settings
+  Cpu
 } from 'lucide-react';
+
+// Streamed Typewriter Component matching Gemini's signature top-to-bottom text reveal
+function StreamedText({ fullText, onUpdate }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayedText('');
+    setIsTyping(true);
+
+    const speed = 10; // ms per tick
+    const chunkSize = 4; // characters per tick for smooth natural streaming
+
+    const timer = setInterval(() => {
+      index += chunkSize;
+      if (index >= fullText.length) {
+        setDisplayedText(fullText);
+        setIsTyping(false);
+        clearInterval(timer);
+      } else {
+        setDisplayedText(fullText.slice(0, index));
+      }
+      if (onUpdate) onUpdate();
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [fullText]);
+
+  return (
+    <div className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-slate-200 transition-all duration-300">
+      {displayedText}
+      {isTyping && (
+        <span className="inline-block w-2 h-4 ml-1 bg-amber-400 animate-pulse rounded-sm align-middle shadow-sm shadow-amber-400" />
+      )}
+    </div>
+  );
+}
 
 export default function MudraAIChatPanel() {
   const [messages, setMessages] = useState([]);
   const [inputMsg, setInputMsg] = useState('');
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -32,11 +66,6 @@ export default function MudraAIChatPanel() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
-
-  const handleSaveApiKey = (key) => {
-    setApiKey(key);
-    localStorage.setItem('gemini_api_key', key);
-  };
 
   const handleSend = async (textToSend) => {
     const query = textToSend || inputMsg;
@@ -59,7 +88,6 @@ export default function MudraAIChatPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: query, 
-          api_key: apiKey,
           history: historyPayload 
         })
       });
@@ -117,7 +145,7 @@ export default function MudraAIChatPanel() {
             <div className="flex items-center gap-2">
               <span className="text-base font-extrabold text-white tracking-tight">Mudra AI</span>
               <span className="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-mono font-semibold">
-                {apiKey ? '✦ Gemini 1.5/2.5 Flash API Connected' : 'ACE v5.5 Agentic Mode'}
+                ✦ Gemini 2.5 Flash Connected
               </span>
             </div>
             <span className="text-[11px] text-slate-400 font-light block">
@@ -126,42 +154,13 @@ export default function MudraAIChatPanel() {
           </div>
         </div>
 
-        {/* Gemini API Key Controls & Reset */}
-        <div className="flex items-center gap-2">
-          {showKeyInput ? (
-            <div className="flex items-center gap-2 bg-[#141a28] p-1.5 rounded-xl border border-slate-700/80">
-              <Key className="w-3.5 h-3.5 text-amber-400 ml-2" />
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => handleSaveApiKey(e.target.value)}
-                placeholder="Paste Gemini API Key..."
-                className="bg-transparent text-xs text-amber-300 font-mono outline-none w-48"
-              />
-              <button
-                onClick={() => setShowKeyInput(false)}
-                className="px-2.5 py-1 bg-amber-500 text-black font-bold text-[10px] rounded-lg cursor-pointer"
-              >
-                Save
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowKeyInput(true)}
-              className="px-3 py-1.5 rounded-xl bg-[#141a28] hover:bg-slate-800 border border-slate-700/80 text-amber-400 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>{apiKey ? 'API Key Active' : 'Set Gemini API Key'}</span>
-            </button>
-          )}
-
-          <button
-            onClick={() => setMessages([])}
-            className="px-3 py-1.5 rounded-xl bg-[#141a28] hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-slate-200 text-xs font-mono transition-all cursor-pointer"
-          >
-            Reset Chat
-          </button>
-        </div>
+        {/* Reset Chat Button */}
+        <button
+          onClick={() => setMessages([])}
+          className="px-3.5 py-1.5 rounded-xl bg-[#141a28] hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-slate-200 text-xs font-mono transition-all cursor-pointer"
+        >
+          Reset Chat
+        </button>
       </div>
 
       {/* Main Chat Conversation Scroll Area */}
@@ -208,7 +207,9 @@ export default function MudraAIChatPanel() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start gap-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-start gap-4 animate-gemini-reveal ${
+              msg.sender === 'user' ? 'justify-end' : 'justify-start'
+            }`}
           >
             {msg.sender === 'ai' && (
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-sm shrink-0 shadow-lg mt-1">
@@ -227,10 +228,8 @@ export default function MudraAIChatPanel() {
                 <span>{msg.text}</span>
               ) : (
                 <div className="space-y-4">
-                  {/* Formatted Reply Body */}
-                  <div className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-slate-200">
-                    {msg.text}
-                  </div>
+                  {/* Formatted Streamed Reply Body */}
+                  <StreamedText fullText={msg.text} onUpdate={scrollToBottom} />
 
                   {/* Optional Telemetry Metrics Pill Bar */}
                   {msg.metrics && (
@@ -268,13 +267,13 @@ export default function MudraAIChatPanel() {
 
         {/* Loading Indicator */}
         {loading && (
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4 animate-gemini-reveal">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-sm shrink-0 shadow-lg animate-pulse">
               ✦
             </div>
             <div className="p-4 rounded-2xl bg-[#0e131f] border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-3">
               <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
-              <span>Mudra AI agent analyzing horoscopes, transits & Gemini Flash model...</span>
+              <span>Mudra AI analyzing horoscopes, transits & Gemini Flash model...</span>
             </div>
           </div>
         )}

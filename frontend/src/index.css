@@ -28,3 +28,18 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #2e3c54;
 }
+
+@keyframes geminiStreamReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-gemini-reveal {
+  animation: geminiStreamReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
