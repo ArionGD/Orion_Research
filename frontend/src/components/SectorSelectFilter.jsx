@@ -47,7 +47,7 @@ export default function SectorSelectFilter({ value = 'All', onChange }) {
         <Filter className="w-3.5 h-3.5 text-amber-400 shrink-0" />
         <span className="text-slate-400">Sector:</span>
         <span className={`font-bold ${selectedSector.color}`}>
-          {selectedSector.label} ({selectedSector.ruling})
+          {selectedSector.label}
         </span>
         <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

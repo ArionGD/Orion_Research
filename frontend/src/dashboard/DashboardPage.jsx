@@ -85,9 +85,13 @@ export default function DashboardPage({ onLogout }) {
     }
   };
 
-  const fetchForecast = async (date, sector) => {
+  const [timeframe, setTimeframe] = useState('1M');
+
+  const fetchForecast = async (date, sector, tf = timeframe) => {
+    const daysMap = { '1W': 7, '1M': 30, '1Y': 365, '5Y': 1825, 'MAX': 3650 };
+    const numDays = daysMap[tf] || 30;
     try {
-      const res = await fetch(`/smi/forecast?start_date=${date}&days=30&sector=${sector}`);
+      const res = await fetch(`/smi/forecast?start_date=${date}&days=${numDays}&sector=${sector}`);
       if (res.ok) {
         const data = await res.json();
         setForecastData(data);
@@ -99,7 +103,7 @@ export default function DashboardPage({ onLogout }) {
 
   const handleSectorChange = (sector) => {
     setSelectedSector(sector);
-    fetchForecast(startDate, sector);
+    fetchForecast(startDate, sector, timeframe);
   };
 
   const formattedLabels = forecastData.map(d => {
@@ -113,13 +117,13 @@ export default function DashboardPage({ onLogout }) {
     labels: formattedLabels,
     datasets: [
       {
-        label: `${selectedSector} Sector SMI Index`,
+        label: `${selectedSector} SMI Index`,
         data: forecastData.map(d => d.smi),
-        borderColor: selectedSector === 'Energy' ? '#ef4444' : selectedSector === 'Technology' ? '#a855f7' : selectedSector === 'Banking' ? '#3b82f6' : '#f59e0b',
+        borderColor: selectedSector === 'Energy' ? '#ef4444' : selectedSector === 'Technology' ? '#a855f7' : selectedSector === 'Banking' ? '#3b82f6' : '#10b981',
         backgroundColor: (context) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          const color = selectedSector === 'Energy' ? 'rgba(239, 68, 68, 0.3)' : selectedSector === 'Technology' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(245, 158, 11, 0.3)';
+          const color = selectedSector === 'Energy' ? 'rgba(239, 68, 68, 0.25)' : selectedSector === 'Technology' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(16, 185, 129, 0.25)';
           gradient.addColorStop(0, color);
           gradient.addColorStop(1, 'rgba(14, 19, 31, 0.0)');
           return gradient;
@@ -127,8 +131,8 @@ export default function DashboardPage({ onLogout }) {
         borderWidth: 2,
         fill: true,
         tension: 0.35,
-        pointBackgroundColor: selectedSector === 'Energy' ? '#ef4444' : selectedSector === 'Technology' ? '#a855f7' : '#f59e0b',
-        pointRadius: 2,
+        pointBackgroundColor: selectedSector === 'Energy' ? '#ef4444' : selectedSector === 'Technology' ? '#a855f7' : '#10b981',
+        pointRadius: 0,
         pointHoverRadius: 6,
       }
     ]
@@ -418,46 +422,81 @@ export default function DashboardPage({ onLogout }) {
         {/* Tab 1: Executive Risk Dashboard */}
         {activeTab === 'executive' && (
           <div className="space-y-4 sm:space-y-8">
-            {/* Enhanced Chart Card with Premium Control Bar */}
-            <div className="p-3.5 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-800/60">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            {/* Enhanced Tickertape / TradingView Style Financial Chart Card */}
+            <div className="p-3.5 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg space-y-4">
+              {/* Header Title & Selector Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/60">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                     <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <div>
                     <h3 className="text-sm sm:text-base font-bold text-white leading-tight">
-                      30-Day Forensic SMI Risk Forecast
+                      {selectedSector} Forensic SMI Risk Index
                     </h3>
-                    <p className="text-slate-400 text-[10px] sm:text-xs font-light">
-                      Sector-weighted malefic pressure trajectory
-                    </p>
                   </div>
                 </div>
 
                 {/* Enhanced Controls Bar */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  {/* Custom Dark Sector Filter Component */}
+                <div className="flex flex-wrap items-center gap-2">
                   <SectorSelectFilter
                     value={selectedSector}
                     onChange={handleSectorChange}
                   />
 
-                  {/* Highlighted Custom Date Picker */}
                   <CustomDatePicker
                     value={startDate}
                     onChange={(newDate) => {
                       setStartDate(newDate);
-                      fetchForecast(newDate, selectedSector);
+                      fetchForecast(newDate, selectedSector, timeframe);
                     }}
                     label="Start:"
                   />
                 </div>
               </div>
 
+              {/* Tickertape Metric Price Bar */}
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold font-mono text-white">7.80</span>
+                  <span className="text-xs font-bold font-mono text-emerald-400 flex items-center gap-0.5">
+                    ▲ +2.84% (+0.22)
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-[10px] sm:text-xs font-mono text-slate-400">
+                  <div>High: <span className="text-slate-200 font-bold">8.40</span></div>
+                  <div>Low: <span className="text-slate-200 font-bold">5.10</span></div>
+                  <div>Trend: <span className="text-emerald-400 font-bold">▲ Elevated Malefic Pressure</span></div>
+                </div>
+              </div>
+
               {/* Chart Canvas */}
-              <div className="h-48 sm:h-80">
+              <div className="h-48 sm:h-80 pt-2">
                 <Line data={chartDataConfig} options={chartOptionsConfig} />
+              </div>
+
+              {/* Bottom Tickertape Timeframe Switcher Nodes Bar (1W, 1M, 1Y, 5Y, MAX) */}
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-1 overflow-x-auto select-none">
+                {['1W', '1M', '1Y', '5Y', 'MAX'].map((tf) => {
+                  const isActive = timeframe === tf;
+                  return (
+                    <button
+                      key={tf}
+                      onClick={() => {
+                        setTimeframe(tf);
+                        fetchForecast(startDate, selectedSector, tf);
+                      }}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                          : 'bg-[#141a28] hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/60'
+                      }`}
+                    >
+                      {tf}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
