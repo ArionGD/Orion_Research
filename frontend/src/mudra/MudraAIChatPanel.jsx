@@ -348,35 +348,35 @@ export default function MudraAIChatPanel() {
       {/* Main Workspace Body with Slide-over Right Drawer */}
       <div className="flex-1 flex relative overflow-hidden z-10">
         {/* Main Chat Conversation Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Welcome Screen when Empty */}
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8 py-12">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-purple-500/20 to-blue-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl shadow-2xl animate-pulse">
+            <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-6 sm:space-y-8 py-8 sm:py-12 px-2">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-purple-500/20 to-blue-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl sm:text-3xl shadow-2xl animate-pulse">
                 ✦
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-3xl font-extrabold text-white tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   Hello, Superuser.
                 </h2>
-                <p className="text-slate-400 text-sm font-light leading-relaxed">
+                <p className="text-slate-400 text-xs sm:text-sm font-light leading-relaxed">
                   Where should Mudra AI focus today? Ask about any NSE Stock, Index, Commodity, or Sovereign SMI Weather risk pattern.
                 </p>
               </div>
 
               {/* Suggestion Chips */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full text-left">
                 {suggestionChips.map((chip, idx) => {
                   const Icon = chip.icon;
                   return (
                     <button
                       key={idx}
                       onClick={() => handleSend(chip.label)}
-                      className="p-4 rounded-2xl bg-[#0e131f] hover:bg-[#141a28] border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 text-xs font-medium transition-all flex items-center gap-3 cursor-pointer group shadow-lg"
+                      className="p-3.5 sm:p-4 rounded-2xl bg-[#0e131f] hover:bg-[#141a28] border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 text-xs font-medium transition-all flex items-center gap-3 cursor-pointer group shadow-lg"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
-                        <Icon className="w-4 h-4" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                       <span className="flex-1 leading-snug">{chip.label}</span>
                       <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 shrink-0" />
@@ -391,18 +391,18 @@ export default function MudraAIChatPanel() {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex items-start gap-4 animate-gemini-reveal ${
+              className={`flex items-start gap-2.5 sm:gap-4 animate-gemini-reveal ${
                 msg.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-sm shrink-0 shadow-lg mt-1">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-xs sm:text-sm shrink-0 shadow-lg mt-1">
                   ✦
                 </div>
               )}
 
               <div
-                className={`max-w-3xl rounded-2xl p-5 text-sm leading-relaxed ${
+                className={`max-w-[88vw] sm:max-w-3xl rounded-2xl p-3.5 sm:p-5 text-xs sm:text-sm leading-relaxed ${
                   msg.sender === 'user'
                     ? 'bg-amber-500/15 border border-amber-500/40 text-white rounded-tr-none font-mono text-xs'
                     : 'bg-[#0e131f] border border-slate-800/90 text-slate-200 rounded-tl-none shadow-xl space-y-4'
@@ -419,13 +419,13 @@ export default function MudraAIChatPanel() {
                     {msg.metrics && (
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/80 font-mono text-xs">
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 rounded-lg bg-[#141a28] border border-slate-700 text-amber-400">
+                          <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-[#141a28] border border-slate-700 text-amber-400 text-[10px] sm:text-xs">
                             SMI: {msg.metrics.smi_score}
                           </span>
-                          <span className="px-3 py-1 rounded-lg bg-[#141a28] border border-slate-700 text-purple-400">
+                          <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-[#141a28] border border-slate-700 text-purple-400 text-[10px] sm:text-xs">
                             Micro: {msg.metrics.micro_risk}
                           </span>
-                          <span className="px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold">
+                          <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[10px] sm:text-xs">
                             Dual Index: {msg.metrics.dual_risk}
                           </span>
                         </div>
@@ -442,8 +442,8 @@ export default function MudraAIChatPanel() {
               </div>
 
               {msg.sender === 'user' && (
-                <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 font-mono text-xs shrink-0 mt-1">
-                  <User className="w-4 h-4" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 font-mono text-xs shrink-0 mt-1">
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
               )}
             </div>
@@ -451,11 +451,11 @@ export default function MudraAIChatPanel() {
 
           {/* Loading Indicator */}
           {loading && (
-            <div className="flex items-start gap-4 animate-gemini-reveal">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-sm shrink-0 shadow-lg animate-pulse">
+            <div className="flex items-start gap-3 sm:gap-4 animate-gemini-reveal">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center text-black font-bold text-xs sm:text-sm shrink-0 shadow-lg animate-pulse">
                 ✦
               </div>
-              <div className="p-4 rounded-2xl bg-[#0e131f] border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-3">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0e131f] border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-3">
                 <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
                 <span>Mudra AI analyzing horoscopes, transits & Gemini Flash model...</span>
               </div>
@@ -465,9 +465,9 @@ export default function MudraAIChatPanel() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Right Expandable / Collapsible Chat History Sidebar Drawer */}
+        {/* Right Expandable / Collapsible Chat History Sidebar Drawer (Full width on Mobile) */}
         <div
-          className={`w-72 bg-[#0c101a] border-l border-slate-800/90 flex flex-col transition-all duration-300 z-20 absolute top-0 right-0 bottom-0 ${
+          className={`w-full sm:w-80 bg-[#0c101a] border-l border-slate-800/90 flex flex-col transition-all duration-300 z-30 absolute top-0 right-0 bottom-0 ${
             drawerOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full pointer-events-none'
           }`}
         >
