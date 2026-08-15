@@ -299,7 +299,7 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
   ];
 
   return (
-    <div className="h-full flex flex-col justify-between bg-[#080b11] rounded-2xl border border-slate-800/90 shadow-2xl relative overflow-hidden font-sans">
+    <div className="flex-1 h-full flex flex-col justify-between bg-[#080b11] rounded-none sm:rounded-2xl border-0 sm:border border-slate-800/90 shadow-2xl relative overflow-hidden font-sans">
       {/* Background Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-purple-600/10 via-amber-500/5 to-transparent blur-[120px] pointer-events-none" />
 
