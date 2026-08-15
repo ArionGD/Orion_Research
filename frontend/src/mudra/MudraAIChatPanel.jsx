@@ -304,28 +304,28 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-purple-600/10 via-amber-500/5 to-transparent blur-[120px] pointer-events-none" />
 
       {/* Top Header Bar */}
-      <div className="p-3.5 sm:p-5 px-4 sm:px-6 border-b border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md flex items-center justify-between z-20">
+      <div className="h-18 sm:h-20 px-4 sm:px-6 border-b border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md flex items-center justify-between z-20 shrink-0 select-none">
         <div className="flex items-center gap-3">
           <button
             onClick={() => onToggleMobileNav && onToggleMobileNav()}
-            className="flex items-center gap-2.5 cursor-pointer lg:cursor-default group text-left"
+            className="flex items-center gap-3 cursor-pointer lg:cursor-default group text-left"
             title="Toggle Menu"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-base shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
               ✦
             </div>
             <div>
-              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight block">Mudra AI</span>
+              <span className="text-base sm:text-lg font-extrabold text-white tracking-tight block">Mudra AI</span>
             </div>
           </button>
         </div>
 
         {/* Right Header Action Bar (New Chat & Expand/Collapse Chat History Drawer) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={startNewChat}
             title="Start New Chat"
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="p-2.5 sm:px-4 sm:py-2 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">New Chat</span>
@@ -334,7 +334,7 @@ export default function MudraAIChatPanel({ onToggleMobileNav }) {
           <button
             onClick={() => setDrawerOpen(!drawerOpen)}
             title={drawerOpen ? "Collapse Conversations Drawer" : "Expand Chat History Drawer"}
-            className="p-2 rounded-xl bg-[#141a28] hover:bg-slate-800 border border-slate-700/80 text-amber-400 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+            className="p-2.5 rounded-2xl bg-[#141a28] hover:bg-slate-800 border border-slate-700/80 text-amber-400 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
           >
             {drawerOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
             <span className="text-xs font-mono font-bold hidden sm:inline">
