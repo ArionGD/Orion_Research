@@ -175,25 +175,70 @@ export default function DashboardPage({ onLogout }) {
     }
   };
 
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
-    <div className="h-screen w-screen bg-[#080b11] text-slate-100 flex overflow-hidden font-sans">
-      {/* Sidebar */}
-      <aside className="w-72 h-screen bg-[#0e131f] border-r border-slate-800/80 flex flex-col shrink-0 select-none">
-        {/* Brand Header */}
-        <div className="p-6 border-b border-slate-800/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-purple-600 flex items-center justify-center text-black font-bold text-xl shadow-lg shadow-amber-500/10">
-            Ω
-          </div>
-          <div>
-            <span className="text-base font-bold tracking-tight text-white block">ORION RESEARCH</span>
-            <span className="text-[10px] font-mono text-amber-500 font-semibold tracking-wider block">
-              ACE v5.5 + VED ENGINE
-            </span>
+    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col lg:flex-row relative overflow-x-hidden font-sans">
+      {/* Mobile Top Header with Hamburger Menu Toggle */}
+      <div className="lg:hidden p-3.5 px-4 bg-[#0e131f] border-b border-slate-800 flex items-center justify-between z-30 shrink-0 select-none">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            className="p-2 rounded-xl bg-slate-900 border border-slate-700/80 text-amber-400 hover:text-white transition-all cursor-pointer"
+            title="Toggle Menu"
+          >
+            {mobileNavOpen ? <LogOut className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm">
+              Ω
+            </div>
+            <span className="text-xs font-bold text-white tracking-tight">ORION RESEARCH</span>
           </div>
         </div>
 
+        <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
+          ACE v5.5
+        </span>
+      </div>
+
+      {/* Mobile Overlay Backdrop */}
+      {mobileNavOpen && (
+        <div
+          onClick={() => setMobileNavOpen(false)}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+        />
+      )}
+
+      {/* Left Navigation Sidebar (Collapsible Mobile Drawer + Desktop Static) */}
+      <aside
+        className={`fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-[#0e131f] border-r border-slate-800/80 flex flex-col shrink-0 select-none transition-transform duration-300 ${
+          mobileNavOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="p-5 sm:p-6 border-b border-slate-800/80 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-purple-600 flex items-center justify-center text-black font-bold text-lg sm:text-xl shadow-lg shadow-amber-500/10">
+              Ω
+            </div>
+            <div>
+              <span className="text-sm sm:text-base font-bold tracking-tight text-white block">ORION RESEARCH</span>
+              <span className="text-[10px] font-mono text-amber-500 font-semibold tracking-wider block">
+                ACE v5.5 + VED ENGINE
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileNavOpen(false)}
+            className="lg:hidden p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+
         {/* Sidebar Nav Items */}
-        <nav className="p-4 space-y-1 flex-1">
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {[
             { id: 'mudra', label: '✦ Mudra AI Platform', icon: Sparkles },
             { id: 'executive', label: 'Executive Risk Dashboard', icon: Activity },
@@ -207,7 +252,10 @@ export default function DashboardPage({ onLogout }) {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setMobileNavOpen(false);
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                   isActive 
                     ? 'bg-amber-500/10 text-white border-l-4 border-amber-500 font-semibold' 
@@ -242,7 +290,7 @@ export default function DashboardPage({ onLogout }) {
       </aside>
 
       {/* Main Content Workspace */}
-      <main className="flex-1 h-screen overflow-y-auto p-8">
+      <main className="flex-1 h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8">
         {/* Render Mudra AI Full Screen */}
         {activeTab === 'mudra' && (
           <MudraAIChatPanel />
