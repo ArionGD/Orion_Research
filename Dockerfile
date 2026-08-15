@@ -1,7 +1,16 @@
-# Dockerfile for Orion_Research FastAPI & Medini Engine
+# --- Stage 1: Build React Frontend ---
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app/frontend
+
+COPY frontend/package*.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build
+
+# --- Stage 2: Final Production Python Server ---
 FROM python:3.11-slim
 
-# Prevent Python from writing .pyc files and enable unbuffered output
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
@@ -19,11 +28,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy dependency requirements
 COPY requirements.txt .
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code and files
+# Copy backend source code & files
 COPY . .
+
+# Copy compiled React frontend static files from Stage 1
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Expose port
 EXPOSE 8000
