@@ -124,12 +124,12 @@ export default function DashboardPage({ onLogout }) {
           gradient.addColorStop(1, 'rgba(14, 19, 31, 0.0)');
           return gradient;
         },
-        borderWidth: 2.5,
+        borderWidth: 2,
         fill: true,
         tension: 0.35,
         pointBackgroundColor: selectedSector === 'Energy' ? '#ef4444' : selectedSector === 'Technology' ? '#a855f7' : '#f59e0b',
-        pointRadius: 4,
-        pointHoverRadius: 7,
+        pointRadius: 2,
+        pointHoverRadius: 6,
       }
     ]
   };
@@ -145,7 +145,7 @@ export default function DashboardPage({ onLogout }) {
         bodyColor: '#f59e0b',
         borderColor: '#212b3e',
         borderWidth: 1,
-        padding: 12,
+        padding: 10,
         displayColors: false,
         callbacks: {
           title: (items) => {
@@ -158,17 +158,18 @@ export default function DashboardPage({ onLogout }) {
     },
     scales: {
       x: {
-        grid: { color: '#1e2638' },
+        grid: { color: 'rgba(30, 38, 56, 0.4)' },
         ticks: { 
           color: '#94a3b8', 
-          font: { family: 'JetBrains Mono', size: 10 },
+          font: { family: 'JetBrains Mono', size: 9 },
           maxRotation: 0,
-          minRotation: 0
+          minRotation: 0,
+          maxTicksLimit: 6
         }
       },
       y: {
-        grid: { color: '#1e2638' },
-        ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 11 } },
+        grid: { color: 'rgba(30, 38, 56, 0.4)' },
+        ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 9 } },
         min: 0,
         max: 10
       }
@@ -371,42 +372,42 @@ export default function DashboardPage({ onLogout }) {
               </div>
             </div>
 
-            {/* Top Metric Cards (Only on Executive Risk Dashboard Tab) */}
+            {/* Top Metric Cards (Only on Executive Risk Dashboard Tab - 1 Row on Mobile) */}
             {activeTab === 'executive' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
-                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
-                    Sovereign Malefic Index (SMI)
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-6 mb-3 sm:mb-8">
+                <div className="p-2 sm:p-6 rounded-xl sm:rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg text-center sm:text-left">
+                  <div className="text-[8px] sm:text-xs uppercase font-mono font-medium text-slate-400 tracking-wider truncate">
+                    SMI Index
                   </div>
-                  <div className="text-xl sm:text-3xl font-bold font-mono text-amber-400 my-1.5 sm:my-2">
+                  <div className="text-sm sm:text-3xl font-bold font-mono text-amber-400 my-0.5 sm:my-2">
                     {smiData?.smi ? smiData.smi.toFixed(2) : '7.80'}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-slate-400">
-                    Status: <span className="text-slate-200 font-medium">{smiData?.status || 'STORM'}</span>
+                  <div className="text-[8px] sm:text-xs text-slate-400 font-mono truncate">
+                    Status: <span className="text-slate-200 font-semibold">{smiData?.status || 'STORM'}</span>
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
-                    System Risk Gravity
+                <div className="p-2 sm:p-6 rounded-xl sm:rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg text-center sm:text-left">
+                  <div className="text-[8px] sm:text-xs uppercase font-mono font-medium text-slate-400 tracking-wider truncate">
+                    Risk Gravity
                   </div>
-                  <div className="text-xl sm:text-3xl font-bold font-mono text-blue-400 my-1.5 sm:my-2">
+                  <div className="text-sm sm:text-3xl font-bold font-mono text-blue-400 my-0.5 sm:my-2">
                     HIGH
                   </div>
-                  <div className="text-[11px] sm:text-xs text-slate-400">
-                    Multi-planetary Alignment Severity
+                  <div className="text-[8px] sm:text-xs text-slate-400 font-mono truncate">
+                    Multi-Planet
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
-                    Ved Jyotish Engine Status
+                <div className="p-2 sm:p-6 rounded-xl sm:rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg text-center sm:text-left">
+                  <div className="text-[8px] sm:text-xs uppercase font-mono font-medium text-slate-400 tracking-wider truncate">
+                    Engine Status
                   </div>
-                  <div className="text-xl sm:text-3xl font-bold font-mono text-purple-400 my-1.5 sm:my-2">
+                  <div className="text-sm sm:text-3xl font-bold font-mono text-purple-400 my-0.5 sm:my-2">
                     PARTIAL
                   </div>
-                  <div className="text-[11px] sm:text-xs text-slate-400">
-                    Official VedAstro 596+ Calculation Routines
+                  <div className="text-[8px] sm:text-xs text-slate-400 font-mono truncate">
+                    VedAstro 596+
                   </div>
                 </div>
               </div>
@@ -416,26 +417,26 @@ export default function DashboardPage({ onLogout }) {
 
         {/* Tab 1: Executive Risk Dashboard */}
         {activeTab === 'executive' && (
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-8">
             {/* Enhanced Chart Card with Premium Control Bar */}
-            <div className="p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800/60">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                    <BarChart3 className="w-4 h-4" />
+            <div className="p-3.5 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-800/60">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-sm sm:text-base font-bold text-white leading-tight">
                       30-Day Forensic SMI Risk Forecast
                     </h3>
-                    <p className="text-slate-400 text-xs font-light">
-                      Showing sector-weighted malefic pressure trajectory
+                    <p className="text-slate-400 text-[10px] sm:text-xs font-light">
+                      Sector-weighted malefic pressure trajectory
                     </p>
                   </div>
                 </div>
 
                 {/* Enhanced Controls Bar */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   {/* Custom Dark Sector Filter Component */}
                   <SectorSelectFilter
                     value={selectedSector}
@@ -455,7 +456,7 @@ export default function DashboardPage({ onLogout }) {
               </div>
 
               {/* Chart Canvas */}
-              <div className="h-80">
+              <div className="h-48 sm:h-80">
                 <Line data={chartDataConfig} options={chartOptionsConfig} />
               </div>
             </div>
