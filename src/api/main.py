@@ -103,7 +103,7 @@ ALIAS_MAP = {
 # Helper to call Google Gemini REST API
 def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list: List[ChatMessage], api_key: str):
     # Active Gemini models in v1beta
-    models_to_try = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.7-flash"]
+    models_to_try = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
     last_err_msg = ""
 
     for model_name in models_to_try:
