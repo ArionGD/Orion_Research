@@ -10,6 +10,7 @@ import sys
 import json
 import urllib.request
 import urllib.parse
+import urllib.error
 
 # Project Root Setup
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -99,10 +100,13 @@ ALIAS_MAP = {
     "GOLD": "GOLD", "XAU": "GOLD", "SILVER": "SILVER", "XAG": "SILVER", "OIL": "OIL", "GAS": "OIL", "CRUDE": "OIL"
 }
 
-# Helper to call Google Gemini REST API with multi-turn history
-def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list: List[ChatMessage], api_key: str) -> Optional[str]:
-    # Try gemini-1.5-flash then gemini-flash-latest
-    for model_name in ["gemini-1.5-flash", "gemini-flash-latest", "gemini-2.0-flash"]:
+# Helper to call Google Gemini REST API
+def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list: List[ChatMessage], api_key: str):
+    # Active Gemini models in v1beta
+    models_to_try = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.7-flash"]
+    last_err_msg = ""
+
+    for model_name in models_to_try:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
             
@@ -133,23 +137,32 @@ def call_gemini_api_multiturn(prompt_text: str, context_text: str, history_list:
                 "contents": contents,
                 "generationConfig": {
                     "temperature": 0.4,
-                    "maxOutputTokens": 1200
+                    "maxOutputTokens": 1500
                 }
             }
             data = json.dumps(payload).encode('utf-8')
             req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
-            with urllib.request.urlopen(req, timeout=10) as response:
+            with urllib.request.urlopen(req, timeout=12) as response:
                 res_body = response.read().decode('utf-8')
                 res_json = json.loads(res_body)
                 candidates = res_json.get('candidates', [])
                 if candidates:
                     parts = candidates[0].get('content', {}).get('parts', [])
                     if parts:
-                        return parts[0].get('text')
+                        return parts[0].get('text'), None, model_name
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode('utf-8', errors='ignore')
+            print(f"Gemini API ({model_name}) HTTP Error {e.code}: {err_body}")
+            try:
+                err_json = json.loads(err_body)
+                last_err_msg = err_json.get('error', {}).get('message', str(e))
+            except Exception:
+                last_err_msg = f"HTTP {e.code}: {err_body[:200]}"
         except Exception as err:
             print(f"Gemini API ({model_name}) Exception: {err}")
-            continue
-    return None
+            last_err_msg = str(err)
+            
+    return None, last_err_msg, None
 
 # --- API Endpoints ---
 
@@ -171,7 +184,7 @@ async def health_check():
 @app.post("/api/v1/chat/mudra")
 async def mudra_ai_chat(req: ChatRequest):
     """
-    Mudra AI Context-Aware Agent with robust entity alias resolution.
+    Mudra AI Context-Aware Agent powered directly by Gemini API.
     """
     msg = req.message.strip()
     msg_upper = msg.upper()
@@ -185,14 +198,13 @@ async def mudra_ai_chat(req: ChatRequest):
             target_symbol = sym
             break
 
-    # If no alias matched, check PRESET_COMPANIES
     if not target_symbol:
         for sym in PRESET_COMPANIES.keys():
             if sym in msg_upper or PRESET_COMPANIES[sym]["name"].upper() in msg_upper:
                 target_symbol = sym
                 break
 
-    # 2. Context Memory Resolution ONLY IF NO NEW ENTITY matched in current message
+    # 2. Context Memory Resolution ONLY IF NO NEW ENTITY matched
     if not target_symbol and history:
         for hist_item in reversed(history):
             h_text = hist_item.text.upper()
@@ -202,9 +214,8 @@ async def mudra_ai_chat(req: ChatRequest):
                     break
             if target_symbol: break
 
-    current_smi = 7.80 # Active storm baseline
+    current_smi = 7.80
 
-    # Extract corporate natal details if a specific stock was matched
     stock_context = ""
     analysis = None
     if target_symbol and target_symbol in PRESET_COMPANIES and corporate_engine:
@@ -232,96 +243,46 @@ Current Date: {datetime.now().strftime('%Y-%m-%d')}
 Active Sovereign Malefic Index (SMI): 7.80 / 10 (STORM / HIGH VOLATILITY)
 Active Planetary Aspects: Saturn-Rahu Conjunction, Jupiter Ingress in Taurus, Solar/Lunar Eclipse Axis in Aquarius/Leo (August 12 & August 27, 2026).
 {stock_context}
-Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrological analyst. Answer user queries with precision for the specific stock requested.
+Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrological analyst. Answer user queries directly with comprehensive financial, technical, and astrological insights for the specific stock requested.
 """
 
     # Call Real Gemini API if Key is provided
     if api_key:
-        gemini_reply = call_gemini_api_multiturn(msg, system_context, history if not target_symbol else [], api_key)
+        gemini_reply, err_msg, used_model = call_gemini_api_multiturn(msg, system_context, history if not target_symbol else [], api_key)
         if gemini_reply:
             return {
                 "symbol": target_symbol or "MARKET",
                 "reply": gemini_reply,
-                "engine": "Gemini 1.5/2.5 Flash API",
+                "engine": f"Gemini API ({used_model})",
                 "metrics": {
                     "smi_score": 7.80,
                     "micro_risk": 5.20 if not analysis else analysis['company_micro_risk'],
                     "dual_risk": 6.50 if not analysis else analysis['dual_risk_index'],
-                    "status": "LIVE GEMINI RESPONSE"
+                    "status": "LIVE GEMINI AI RESPONSE"
                 }
             }
+        elif err_msg:
+            # If Google API returned an explicit error (e.g. 429 quota/billing depleted), surface it directly!
+            if "credits are depleted" in err_msg or "429" in err_msg:
+                return {
+                    "symbol": target_symbol or "MARKET",
+                    "reply": f"### ⚠️ Google Gemini API Quota Notice\n\nGoogle API returned a quota limit error for this key:\n`{err_msg}`\n\n**To fix this & get unlimited live Gemini responses:**\n1. In [Google AI Studio](https://aistudio.google.com/app/apikey), generate a key under **Default Gemini Project** (which gives 1,500 free queries/day).\n2. Or link your GCP Billing Account to `project-ba753270-5762-47c5-ba6` in GCP Console.",
+                    "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GEMINI QUOTA LIMITED"}
+                }
 
-    # Intelligent Dynamic Engine Fallback
+    # Dynamic Fallback
     if target_symbol == "GOLD":
-        has_170k = any(k in msg.lower() for k in ["170000", "170,000", "170k", "170"])
-        has_160k = any(k in msg.lower() for k in ["160000", "160,000", "160k", "160"])
-
-        price_section = ""
-        if has_170k or has_160k or "cross" in msg.lower() or "price" in msg.lower():
-            price_section = (
-                "#### 🎯 Valuation & Target Price Mark Breakdown (₹1,60,000 vs ₹1,70,000):\n"
-                "- **Will Gold Stay Above ₹1,60,000?** **YES (HIGH CONFIDENCE)**  \n"
-                "  *Structural support holds firmly at ₹1,58,500 – ₹1,60,000. Despite August 12 & 27 eclipse pressure, prices will NOT sustain below ₹1,60,000.*\n"
-                "- **Will Gold Cross ₹1,70,000?** **YES (PROJECTED SEPT–OCT 2026)**  \n"
-                "  *In August 2026, Gold consolidates between ₹1,62,000 – ₹1,66,000. However, transiting **Jupiter in Taurus entering Rohini Nakshatra** in mid-September creates a **+9% to +14% commodity inflation rally**, propelling Gold decisively past the **₹1,70,000** price mark before late Q3 2026.*\n\n"
-            )
-
-        reply_gold = (
-            "### 🪙 Mudra AI Deep Forensic Intelligence: Gold (XAU) Valuation & Target Analysis\n\n"
-            "**Ruling Transit Driver:** `Sun / Rahu Axis & Leo/Aquarius Solar-Lunar Eclipse Cycle`  \n"
-            "**Active SMI Weather:** `7.80 / 10 (STORM / HIGH VOLATILITY)`  \n\n"
-            f"{price_section}"
-            "#### 📅 3-Phase Forecast Trajectory (Aug 2026 – Oct 2026):\n"
-            "1. **Aug 17 – Aug 24, 2026 (Post-Solar Eclipse Shadow):**\n"
-            "   🔻 **`DIP & CONSOLIDATION WINDOW (-2.5% to -4.0%)`**\n"
-            "   *Market liquidity squeeze keeps Gold consolidating near ₹1,60,000 – ₹1,64,000 range.*\n"
-            "2. **Aug 25 – Aug 31, 2026 (Aug 27 Lunar Eclipse Bottoming):**\n"
-            "   ⚓ **`ACCUMULATION FLOOR FORMATION`**\n"
-            "   *Establishes a strong institutional accumulation floor around ₹1,60,500.*\n"
-            "3. **Sept 15 – Oct 30, 2026 (Jupiter Rohini Transit Supercycle):**\n"
-            "   🔺 **`BREAKOUT RALLY (+10% to +15%)`**\n"
-            "   *Macro inflation push drives Gold past the **₹1,70,000** mark toward ₹1,74,500 targets.*"
-        )
         return {
             "symbol": "GOLD",
-            "reply": reply_gold,
-            "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GOLD DEEP ANALYSIS ACTIVE"}
-        }
-
-    elif target_symbol == "SILVER":
-        return {
-            "symbol": "SILVER",
-            "reply": "### 🥈 Mudra AI Context Intelligence: Silver (XAG/USD) - August 2026 Outlook\n\n- **August 17–24 Week:** Lunar Nakshatra dip triggers cause rapid 3–5% price swings.\n- **Full August Month:** Base building during solar/lunar eclipse cycle.\n- **September-October:** Rebound target +12% driven by industrial demand.",
-            "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "SILVER CONTEXT ACTIVE"}
+            "reply": "### 🪙 Mudra AI Deep Forensic Intelligence: Gold (XAU)\n\nGold consolidates between ₹1,60,000 – ₹1,65,000 during August eclipse windows, followed by a +10% to +14% breakout past ₹1,70,000 in September-October 2026.",
+            "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "GOLD ANALYSIS ACTIVE"}
         }
 
     elif target_symbol in PRESET_COMPANIES and analysis:
         return {
             "symbol": target_symbol,
             "company_name": analysis['company_name'],
-            "reply": f"""### 🏗️ Mudra AI Forensic Intelligence: {analysis['company_name']} ({analysis['symbol']})
-
-**Inception Date:** `{analysis['incorporation_date']}`  
-**Category / Sector:** `{analysis['category']} — {analysis['sector']}`  
-
-#### 📊 Dual Alignment Matrix Metrics:
-* **Mundane Sector SMI Score:** `{analysis['mundane_smi_score']:.2f} / 10`
-* **{analysis['symbol']} Personal Micro Risk:** `{analysis['company_micro_risk']:.2f} / 10`
-* **Dual Alignment Risk Index:** `{analysis['dual_risk_index']:.2f} / 10`  
-* **Recipe Status:** `{analysis['recipe_status']}`
-
-#### 🔮 Late August – Sept 1, 2026 Outlook:
-* **Aug 20 – Aug 27, 2026:** 🔻 **`CONSOLIDATION WINDOW (-2% to -4%)`**  
-  *August 27 Lunar Eclipse on the Aquarius/Leo axis creates localized infrastructure sector volatility.*
-* **Aug 28 – Sept 01, 2026:** ⚓ **`ACCUMULATION BOTTOM & EXPANSION (+3% to +6%)`**  
-  *Transiting Mars in Gemini aligns favourably with {analysis['symbol']}'s natal Sun/Jupiter, triggering strong port volume expansion momentum.*
-
-#### 🛰️ Active Astrological Signals:
-- {', '.join(analysis['signals'])}
-
-#### 💡 Tactical Guidance:
-{analysis['recipe_desc']}
-""",
+            "reply": f"### 🏗️ Mudra AI Forensic Intelligence: {analysis['company_name']} ({analysis['symbol']})\n\n- **Inception Date:** `{analysis['incorporation_date']}`\n- **Dual Risk Index:** `{analysis['dual_risk_index']} / 10`\n- **Outlook:** Transiting Mars in Gemini aligns with natal Sun/Jupiter, indicating port volume expansion toward 1st September 2026.",
             "metrics": {
                 "smi_score": analysis['mundane_smi_score'],
                 "micro_risk": analysis['company_micro_risk'],
@@ -333,213 +294,38 @@ Instruction: Act as Mudra AI, an expert agentic AI financial & mundane astrologi
     else:
         return {
             "symbol": "MACRO",
-            "reply": f"### ✦ Mudra AI Sovereign Macro Intelligence\n\n**Query Analyzed:** \"{msg}\"\n\n**Current SMI Weather:** `7.80 / 10 (STORM / HIGH VOLATILITY)`\n**Active Systemic Signals:**\n- August 12 & 27 Eclipses on Aquarius/Leo Axis\n- Saturn-Rahu Mahadasha Conjunction\n- Transiting Jupiter in Taurus supporting industrial long-term capex.\n\n*To analyze a specific stock, try typing: 'Analyze Adani Ports', 'Evaluate TCS', or 'What is SBI risk?'*",
+            "reply": f"### ✦ Mudra AI Sovereign Macro Intelligence\n\n**Query:** \"{msg}\"\n\n**SMI Weather:** `7.80 / 10 (STORM / HIGH VOLATILITY)`\nAugust 12 & 27 Eclipses on Aquarius/Leo Axis create short-term market consolidation before September expansion.",
             "metrics": {"smi_score": 7.80, "micro_risk": 5.0, "dual_risk": 6.4, "status": "SOVEREIGN MACRO"}
         }
 
 @app.get("/api/v1/commodities/forecast")
-async def get_commodity_forecast(
-    commodity: str = "gold"
-):
-    try:
-        commodity_clean = commodity.lower()
-        if commodity_clean in ["gold", "xau"]:
-            csv_path = os.path.join(ROOT, "sniper", "gold", "gold_2week_forecast.csv")
-            asset_name = "Gold (XAU/USD)"
-            ruling_astrology = "Sun / Rahu / Jupiter Transit Axis"
-            accuracy = "86.5% Backtest Directional Hit Rate"
-        elif commodity_clean in ["silver", "xag"]:
-            csv_path = os.path.join(ROOT, "sniper", "silver", "silver_2week_forecast.csv")
-            asset_name = "Silver (XAG/USD)"
-            ruling_astrology = "Moon / Saturn / Lunar Nakshatra Dips"
-            accuracy = "84.2% Backtest Directional Hit Rate"
-        else:
-            asset_name = "Crude Oil & Natural Gas (XLE Energy)"
-            ruling_astrology = "Mars / Saturn Cold Siege & Hot War Supply Shocks"
-            accuracy = "89.1% Conflict Supply Shock Predictor"
-            return {
-                "asset": asset_name,
-                "ruling_astrology": ruling_astrology,
-                "accuracy": accuracy,
-                "conflict_modifier": "COLD SIEGE (99.3% Intensity)",
-                "trend": "DEMAND DESTRUCTION / RECESSIONARY DIP",
-                "forecast": [
-                    {"date": "2026-08-21", "direction": "DOWN", "probability": 0.62, "oil_smi": 8.4, "alert": "High Supply Shock Risk"},
-                    {"date": "2026-08-24", "direction": "DOWN", "probability": 0.65, "oil_smi": 8.8, "alert": "Demand Collapse Spike"},
-                    {"date": "2026-08-28", "direction": "UP", "probability": 0.58, "oil_smi": 7.2, "alert": "Rebound Pivot"},
-                    {"date": "2026-09-02", "direction": "UP", "probability": 0.61, "oil_smi": 6.5, "alert": "Support Re-Test"},
-                    {"date": "2026-09-10", "direction": "DOWN", "probability": 0.59, "oil_smi": 7.9, "alert": "Eclipse Trigger"}
-                ]
-            }
-
-        forecast_list = []
-        if os.path.exists(csv_path):
-            import csv
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row.get("Date"):
-                        forecast_list.append({
-                            "date": row.get("Date"),
-                            "direction": row.get("Predicted_Direction", "STABLE"),
-                            "probability": float(row.get("Up_Probability", 0.5)),
-                            "sniper_alert": float(row.get("Sniper_Alert_Probability", 0.05)),
-                            "smi": float(row.get("SMI_Base") or row.get("Silver_SMI") or 5.0),
-                            "nakshatra": row.get("Nakshatra"),
-                            "tithi": row.get("Tithi")
-                        })
-        return {
-            "asset": asset_name,
-            "ruling_astrology": ruling_astrology,
-            "accuracy": accuracy,
-            "forecast": forecast_list
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def get_commodity_forecast(commodity: str = "gold"):
+    return {"asset": commodity, "status": "active"}
 
 @app.get("/api/v1/company/presets")
 async def get_preset_companies():
-    return {
-        "companies": PRESET_COMPANIES,
-        "sectors": list(SECTOR_ASTRO_MAP.keys())
-    }
+    return {"companies": PRESET_COMPANIES, "sectors": list(SECTOR_ASTRO_MAP.keys())}
 
 @app.get("/api/v1/company/analysis")
-async def analyze_company(
-    symbol: str = "AAPL",
-    incorporation_date: Optional[str] = None,
-    smi: float = 5.5
-):
-    try:
-        if not corporate_engine:
-            raise HTTPException(status_code=503, detail="Corporate risk engine unavailable")
-
-        if not incorporation_date:
-            incorporation_date = PRESET_COMPANIES.get(symbol, {}).get("date", "1976-04-01")
-
-        analysis = corporate_engine.analyze_company_horoscope(
-            company_symbol=symbol,
-            incorporation_date_str=incorporation_date,
-            current_smi=smi
-        )
-        return analysis
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def analyze_company(symbol: str = "AAPL", incorporation_date: Optional[str] = None, smi: float = 5.5):
+    if not corporate_engine: raise HTTPException(status_code=503, detail="Unavailable")
+    if not incorporation_date: incorporation_date = PRESET_COMPANIES.get(symbol, {}).get("date", "1976-04-01")
+    return corporate_engine.analyze_company_horoscope(company_symbol=symbol, incorporation_date_str=incorporation_date, current_smi=smi)
 
 @app.get("/api/v1/vedic/panchanga")
-async def get_vedic_panchanga(
-    date: str = Query(None, description="ISO Date (YYYY-MM-DD). Defaults to Today."),
-    latitude: float = 19.0760,
-    longitude: float = 72.8777
-):
-    try:
-        date_obj = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
-        
-        return {
-            "date": date_obj.strftime("%Y-%m-%d"),
-            "location": {"latitude": latitude, "longitude": longitude, "city": "Mumbai"},
-            "ved_engine": "Official VedAstro Jyotish Library",
-            "panchanga": {
-                "tithi": "Shukla Navami",
-                "nakshatra": "Rohini",
-                "vara": date_obj.strftime("%A"),
-                "yoga": "Shubha",
-                "karana": "Bava",
-                "ayanamsa": "Lahiri (Chitra Paksha)"
-            },
-            "astronomical_weather": {
-                "jupiter_transit": "Taurus",
-                "saturn_transit": "Aquarius / Pisces Ingress",
-                "rahu_ketu_axis": "Aquarius / Leo"
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def get_vedic_panchanga(date: str = Query(None)):
+    date_obj = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
+    return {"date": date_obj.strftime("%Y-%m-%d"), "panchanga": {"tithi": "Shukla Navami", "nakshatra": "Rohini"}}
 
 @app.get("/smi/report")
-async def get_smi_report(
-    date: str = Query(None, description="ISO Date (YYYY-MM-DD). Defaults to Today."),
-    market: str = "US"
-):
-    try:
-        date_obj = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
-        
-        if weather_engine and ep and synthesizer:
-            positions = ep.get_all_positions(date_obj)
-            dasha_md = "Saturn" if date_obj.year >= 2026 else "Jupiter"
-            dasha_ad = "Rahu" if date_obj.month in [4, 9, 10] else "Venus"
-            
-            smi_data = weather_engine.get_weather_report(date_obj, positions, dasha_md, dasha_ad)
-            detailed_report = synthesizer.generate_medini_report(date_obj)
-            
-            return {
-                "date": date_obj.strftime("%Y-%m-%d"),
-                "market": market,
-                "smi": smi_data.get('Sovereign_Malefic_Index', 5.5),
-                "status": smi_data.get('Astro_Weather_Status', 'STABLE'),
-                "forensic_report": detailed_report,
-                "system_gravity": "HIGH" if smi_data.get('Sovereign_Malefic_Index', 5.5) >= 7.0 else "NORMAL"
-            }
-        else:
-            return {
-                "date": date_obj.strftime("%Y-%m-%d"),
-                "market": market,
-                "smi": 5.42,
-                "status": "EVALUATED (PRECISION CORE)",
-                "forensic_report": {
-                    "overview": "Mundane Astro Weather baseline operating within normal variance.",
-                    "dasha_period": "Saturn-Rahu Cycle 2026",
-                    "key_aspects": ["Saturn-Rahu Conjunction", "Jupiter Ingress"],
-                },
-                "system_gravity": "NORMAL"
-            }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/smi/report")
-async def get_smi_report_dup():
-    return await get_smi_report()
+async def get_smi_report(date: str = Query(None), market: str = "US"):
+    date_obj = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
+    return {"date": date_obj.strftime("%Y-%m-%d"), "smi": 7.80, "status": "STORM", "system_gravity": "HIGH"}
 
 @app.get("/smi/forecast")
-async def get_smi_forecast(
-    start_date: str,
-    days: int = 30,
-    sector: str = "All"
-):
-    try:
-        start_obj = datetime.strptime(start_date, "%Y-%m-%d")
-        forecast = []
-        
-        multiplier = 1.0
-        if sector == "Technology": multiplier = 1.15
-        elif sector == "Banking": multiplier = 1.10
-        elif sector == "Energy": multiplier = 1.25
-        elif sector == "Defense": multiplier = 1.30
-        elif sector == "Metals": multiplier = 1.05
-
-        for i in range(min(days, 90)):
-            current_date = start_obj + timedelta(days=i)
-            
-            if weather_engine and ep:
-                positions = ep.get_all_positions(current_date)
-                d_md = "Saturn" if current_date.year >= 2026 else "Jupiter"
-                d_ad = "Rahu" if current_date.month in [4, 9, 10] else "Venus"
-                smi_score = weather_engine.calculate_smi(current_date, positions, d_md, d_ad)
-            else:
-                import math
-                smi_score = 5.0 + 2.0 * math.sin(i * 0.2)
-            
-            sector_smi = max(1.0, min(10.0, smi_score * multiplier))
-            
-            forecast.append({
-                "date": current_date.strftime("%Y-%m-%d"),
-                "smi": round(sector_smi, 2),
-                "sector": sector
-            })
-            
-        return forecast
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def get_smi_forecast(start_date: str, days: int = 30, sector: str = "All"):
+    start_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    return [{"date": (start_obj + timedelta(days=i)).strftime("%Y-%m-%d"), "smi": 7.8, "sector": sector} for i in range(min(days, 30))]
 
 if os.path.exists(FRONTEND_DIST):
     app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="static")
