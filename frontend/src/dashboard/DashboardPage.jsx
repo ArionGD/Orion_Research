@@ -332,7 +332,7 @@ export default function DashboardPage({ onLogout }) {
       </div>
 
       {/* Main Content Workspace with Bottom Padding for Mobile Bottom Bar */}
-      <main className="flex-1 h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-20 lg:pb-8">
+      <main className={`flex-1 ${activeTab === 'mudra' ? 'h-[calc(100vh-4rem)] lg:h-screen overflow-hidden p-1 sm:p-4 pb-16 lg:pb-4' : 'h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-20 lg:pb-8'}`}>
         {/* Render Mudra AI Full Screen */}
         {activeTab === 'mudra' && (
           <MudraAIChatPanel onToggleMobileNav={() => setMobileNavOpen(!mobileNavOpen)} />
