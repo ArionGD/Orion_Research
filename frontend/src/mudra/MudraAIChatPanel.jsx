@@ -148,7 +148,7 @@ function StreamedText({ fullText, onUpdate }) {
   );
 }
 
-export default function MudraAIChatPanel() {
+export default function MudraAIChatPanel({ onToggleMobileNav }) {
   const [messages, setMessages] = useState([]);
   const [inputMsg, setInputMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -306,12 +306,18 @@ export default function MudraAIChatPanel() {
       {/* Top Header Bar */}
       <div className="p-3.5 sm:p-5 px-4 sm:px-6 border-b border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-lg shadow-amber-500/20">
-            ✦
-          </div>
-          <div>
-            <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">Mudra AI</span>
-          </div>
+          <button
+            onClick={() => onToggleMobileNav && onToggleMobileNav()}
+            className="flex items-center gap-2.5 cursor-pointer lg:cursor-default group text-left"
+            title="Toggle Menu"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+              ✦
+            </div>
+            <div>
+              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight block">Mudra AI</span>
+            </div>
+          </button>
         </div>
 
         {/* Right Header Action Bar (New Chat & Expand/Collapse Chat History Drawer) */}

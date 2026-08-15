@@ -179,34 +179,36 @@ export default function DashboardPage({ onLogout }) {
 
   return (
     <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col lg:flex-row relative overflow-x-hidden font-sans">
-      {/* Mobile Top Header with Clickable Logo & Menu Toggle */}
-      <div className="lg:hidden h-14 px-4 bg-[#0e131f] border-b border-slate-800 flex items-center justify-between z-30 shrink-0 select-none">
-        <button
-          onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          className="flex items-center gap-2.5 group cursor-pointer"
-          title="Toggle Navigation Menu"
-        >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-md group-hover:scale-105 transition-transform">
-            Ω
-          </div>
-          <div className="text-left">
-            <span className="text-xs font-bold text-white tracking-tight block">ORION RESEARCH</span>
-            <span className="text-[9px] font-mono text-amber-400 font-semibold block">Tap logo to menu</span>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-2">
+      {/* Mobile Top Header for Non-Mudra Tabs */}
+      {activeTab !== 'mudra' && (
+        <div className="lg:hidden h-14 px-4 bg-[#0e131f] border-b border-slate-800 flex items-center justify-between z-30 shrink-0 select-none">
           <button
             onClick={() => setMobileNavOpen(!mobileNavOpen)}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700/80 text-amber-400 hover:text-white transition-all cursor-pointer"
+            className="flex items-center gap-2.5 group cursor-pointer"
+            title="Toggle Navigation Menu"
           >
-            <Activity className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-md group-hover:scale-105 transition-transform">
+              Ω
+            </div>
+            <div className="text-left">
+              <span className="text-xs font-bold text-white tracking-tight block">ORION RESEARCH</span>
+              <span className="text-[9px] font-mono text-amber-400 font-semibold block">Tap logo to menu</span>
+            </div>
           </button>
-          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
-            ACE v5.5
-          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="p-2 rounded-xl bg-slate-900 border border-slate-700/80 text-amber-400 hover:text-white transition-all cursor-pointer"
+            >
+              <Activity className="w-4 h-4" />
+            </button>
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
+              ACE v5.5
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile Overlay Backdrop */}
       {mobileNavOpen && (
@@ -333,7 +335,7 @@ export default function DashboardPage({ onLogout }) {
       <main className="flex-1 h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-20 lg:pb-8">
         {/* Render Mudra AI Full Screen */}
         {activeTab === 'mudra' && (
-          <MudraAIChatPanel />
+          <MudraAIChatPanel onToggleMobileNav={() => setMobileNavOpen(!mobileNavOpen)} />
         )}
 
         {/* Top Bar & Metrics (Hidden for Mudra AI Tab) */}
