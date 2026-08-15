@@ -292,10 +292,10 @@ export default function MudraAIChatPanel() {
   };
 
   const suggestionChips = [
-    { label: 'Analyze Reliance (RELIANCE) 2-Month Forecast', icon: TrendingUp },
-    { label: 'Evaluate State Bank of India (SBIN) Dual Risk', icon: Building2 },
-    { label: 'What is TCS & Infosys (INFY) Transit Outlook?', icon: Cpu },
-    { label: 'Show Gold (XAU) & Silver 2-Week Dip Probability', icon: Coins }
+    { label: 'Reliance', prompt: 'Analyze Reliance (RELIANCE) 2-Month Forecast', icon: TrendingUp },
+    { label: 'SBI Risk', prompt: 'Evaluate State Bank of India (SBIN) Dual Risk', icon: Building2 },
+    { label: 'TCS & INFY', prompt: 'What is TCS & Infosys (INFY) Transit Outlook?', icon: Cpu },
+    { label: 'Gold & Silver', prompt: 'Show Gold (XAU) & Silver 2-Week Dip Probability', icon: Coins }
   ];
 
   return (
@@ -304,21 +304,13 @@ export default function MudraAIChatPanel() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-purple-600/10 via-amber-500/5 to-transparent blur-[120px] pointer-events-none" />
 
       {/* Top Header Bar */}
-      <div className="p-4 px-6 border-b border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md flex items-center justify-between z-20">
+      <div className="p-3.5 sm:p-5 px-4 sm:px-6 border-b border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold shadow-lg shadow-amber-500/20">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-lg shadow-amber-500/20">
             ✦
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-extrabold text-white tracking-tight">Mudra AI</span>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-mono font-semibold">
-                ✦ Gemini 2.5 Flash Connected
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-400 font-light block">
-              Agentic Astrological Intelligence & Market Analyst
-            </span>
+            <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">Mudra AI</span>
           </div>
         </div>
 
@@ -326,10 +318,11 @@ export default function MudraAIChatPanel() {
         <div className="flex items-center gap-2">
           <button
             onClick={startNewChat}
-            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-500/20 hover:from-amber-500/30 hover:to-purple-500/30 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+            title="Start New Chat"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Chat</span>
+            <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">New Chat</span>
           </button>
 
           <button
@@ -366,20 +359,20 @@ export default function MudraAIChatPanel() {
               </div>
 
               {/* Suggestion Chips */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full text-left">
+              <div className="grid grid-cols-2 gap-2 w-full text-left max-w-md">
                 {suggestionChips.map((chip, idx) => {
                   const Icon = chip.icon;
                   return (
                     <button
                       key={idx}
-                      onClick={() => handleSend(chip.label)}
-                      className="p-3.5 sm:p-4 rounded-2xl bg-[#0e131f] hover:bg-[#141a28] border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 text-xs font-medium transition-all flex items-center gap-3 cursor-pointer group shadow-lg"
+                      onClick={() => handleSend(chip.prompt || chip.label)}
+                      className="p-2.5 rounded-xl bg-[#0e131f] hover:bg-[#141a28] border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 text-xs font-medium transition-all flex items-center justify-between cursor-pointer group shadow-sm"
                     >
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
-                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="font-mono text-xs font-semibold">{chip.label}</span>
                       </div>
-                      <span className="flex-1 leading-snug">{chip.label}</span>
-                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 shrink-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 shrink-0" />
                     </button>
                   );
                 })}
@@ -529,34 +522,34 @@ export default function MudraAIChatPanel() {
         </div>
       </div>
 
-      {/* Bottom Floating Prompt Bar */}
-      <div className="p-4 border-t border-slate-800/80 bg-[#0e131f]/90 backdrop-blur-md z-10">
+      {/* Simple Clean Floating Input Bar */}
+      <div className="p-2.5 sm:p-4 z-10">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="relative max-w-4xl mx-auto flex items-center gap-3"
+          className="relative max-w-4xl mx-auto flex items-center gap-2"
         >
           <input
             type="text"
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
-            placeholder="Ask Mudra AI about ANY stock (e.g. TCS, INFY, SBIN, ICICIBANK, Gold, Silver)..."
-            className="w-full bg-[#141a28] border border-slate-700/80 focus:border-amber-500 text-white placeholder-slate-500 text-xs font-mono px-5 py-3.5 rounded-2xl outline-none transition-all shadow-inner"
+            placeholder="Ask Mudra AI (e.g. TCS, INFY, SBIN, Gold)..."
+            className="w-full bg-[#141a28] border border-slate-700/80 focus:border-amber-500 text-white placeholder-slate-500 text-xs font-mono px-4 py-3 rounded-xl outline-none transition-all shadow-inner"
           />
 
           <button
             type="submit"
             disabled={!inputMsg.trim() || loading}
-            className={`px-5 py-3.5 rounded-2xl font-mono text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
+            title="Send Message"
+            className={`p-3 rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center ${
               inputMsg.trim() && !loading
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/20 hover:scale-105'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 hover:scale-105'
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Ask Mudra</span>
+            <Send className="w-4 h-4" />
           </button>
         </form>
       </div>

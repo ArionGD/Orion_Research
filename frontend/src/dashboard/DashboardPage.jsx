@@ -179,34 +179,40 @@ export default function DashboardPage({ onLogout }) {
 
   return (
     <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col lg:flex-row relative overflow-x-hidden font-sans">
-      {/* Mobile Top Header with Hamburger Menu Toggle */}
-      <div className="lg:hidden p-3.5 px-4 bg-[#0e131f] border-b border-slate-800 flex items-center justify-between z-30 shrink-0 select-none">
-        <div className="flex items-center gap-2.5">
+      {/* Mobile Top Header with Clickable Logo & Menu Toggle */}
+      <div className="lg:hidden h-14 px-4 bg-[#0e131f] border-b border-slate-800 flex items-center justify-between z-30 shrink-0 select-none">
+        <button
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          className="flex items-center gap-2.5 group cursor-pointer"
+          title="Toggle Navigation Menu"
+        >
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm shadow-md group-hover:scale-105 transition-transform">
+            Ω
+          </div>
+          <div className="text-left">
+            <span className="text-xs font-bold text-white tracking-tight block">ORION RESEARCH</span>
+            <span className="text-[9px] font-mono text-amber-400 font-semibold block">Tap logo to menu</span>
+          </div>
+        </button>
+
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileNavOpen(!mobileNavOpen)}
             className="p-2 rounded-xl bg-slate-900 border border-slate-700/80 text-amber-400 hover:text-white transition-all cursor-pointer"
-            title="Toggle Menu"
           >
-            {mobileNavOpen ? <LogOut className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+            <Activity className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-black font-bold text-sm">
-              Ω
-            </div>
-            <span className="text-xs font-bold text-white tracking-tight">ORION RESEARCH</span>
-          </div>
+          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
+            ACE v5.5
+          </span>
         </div>
-
-        <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
-          ACE v5.5
-        </span>
       </div>
 
       {/* Mobile Overlay Backdrop */}
       {mobileNavOpen && (
         <div
           onClick={() => setMobileNavOpen(false)}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 lg:hidden transition-opacity"
         />
       )}
 
@@ -218,8 +224,11 @@ export default function DashboardPage({ onLogout }) {
       >
         {/* Brand Header */}
         <div className="p-5 sm:p-6 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-purple-600 flex items-center justify-center text-black font-bold text-lg sm:text-xl shadow-lg shadow-amber-500/10">
+          <button
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            className="flex items-center gap-3 text-left cursor-pointer group"
+          >
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-purple-600 flex items-center justify-center text-black font-bold text-lg sm:text-xl shadow-lg shadow-amber-500/10 group-hover:scale-105 transition-transform">
               Ω
             </div>
             <div>
@@ -228,7 +237,7 @@ export default function DashboardPage({ onLogout }) {
                 ACE v5.5 + VED ENGINE
               </span>
             </div>
-          </div>
+          </button>
           <button
             onClick={() => setMobileNavOpen(false)}
             className="lg:hidden p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white"
@@ -289,8 +298,39 @@ export default function DashboardPage({ onLogout }) {
         </div>
       </aside>
 
-      {/* Main Content Workspace */}
-      <main className="flex-1 h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8">
+      {/* Phone View Bottom Navigation Bar (5 Main Tabs) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-[#0e131f]/95 backdrop-blur-md border-t border-slate-800 flex items-center justify-around px-2 shadow-2xl select-none">
+        {[
+          { id: 'mudra', label: 'Mudra AI', icon: Sparkles },
+          { id: 'executive', label: 'Risk', icon: Activity },
+          { id: 'company', label: 'Company', icon: Building2 },
+          { id: 'vedic', label: 'Vedic', icon: Moon },
+          { id: 'commodities', label: 'Commodity', icon: TrendingUp },
+        ].map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveTab(item.id);
+                setMobileNavOpen(false);
+              }}
+              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
+                isActive
+                  ? 'text-amber-400 font-bold bg-amber-500/10 border border-amber-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400 scale-110' : 'text-slate-400'}`} />
+              <span className="text-[10px] font-mono leading-none">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Main Content Workspace with Bottom Padding for Mobile Bottom Bar */}
+      <main className="flex-1 h-[calc(100vh-3.5rem)] lg:h-screen overflow-y-auto p-3 sm:p-6 lg:p-8 pb-20 lg:pb-8">
         {/* Render Mudra AI Full Screen */}
         {activeTab === 'mudra' && (
           <MudraAIChatPanel />
@@ -299,32 +339,32 @@ export default function DashboardPage({ onLogout }) {
         {/* Top Bar & Metrics (Hidden for Mudra AI Tab) */}
         {activeTab !== 'mudra' && (
           <>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-8">
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
                   {activeTab === 'executive' && 'Executive Risk Dashboard'}
                   {activeTab === 'company' && 'Company Chart & Dual Alignment Risk'}
                   {activeTab === 'vedic' && 'Ved Jyotish Astronomical Research'}
                   {activeTab === 'commodities' && 'Commodity & Energy Intelligence'}
                   {activeTab === 'telemetry' && 'API Telemetry & Logs'}
                 </h1>
-                <p className="text-slate-400 text-xs mt-1 font-light">
+                <p className="hidden sm:block text-slate-400 text-xs mt-1 font-light">
                   Mundane Astrological Analytics + Official VedAstro Jyotish Calculation Suite
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={fetchAllData}
-                  className="px-4 py-2 rounded-xl bg-[#141a28] border border-slate-700/80 hover:border-slate-600 text-slate-200 text-xs font-medium flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#141a28] border border-slate-700/80 hover:border-slate-600 text-slate-200 text-xs font-medium flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                  <span>Refresh Telemetry</span>
+                  <span>Refresh</span>
                 </button>
 
-                <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2">
+                <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  ENGINE READY
+                  READY
                 </span>
               </div>
             </div>

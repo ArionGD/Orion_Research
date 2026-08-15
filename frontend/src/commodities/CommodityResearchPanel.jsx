@@ -109,9 +109,9 @@ export default function CommodityResearchPanel() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Top Asset Selector Banner */}
-      <div className="p-8 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-xl relative">
+      <div className="p-4 sm:p-8 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-xl relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
