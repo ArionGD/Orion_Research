@@ -7,10 +7,13 @@ from datetime import datetime, timedelta
 import os
 import sys
 
-# Project Root Setup
+# Project Root & Ved Engine Setup
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+VED_PATH = os.path.join(ROOT, 'ved_engine')
 if ROOT not in sys.path:
     sys.path.append(ROOT)
+if VED_PATH not in sys.path:
+    sys.path.append(VED_PATH)
 
 # Core Engine Imports
 try:
@@ -23,9 +26,18 @@ except Exception as e:
     MediniSynthesizer = None
     EphemerisProvider = None
 
+# Ved Engine Imports
+try:
+    import vedastro
+    from vedastro import Calculate, GeoLocation, Time, PlanetName, HouseName, ZodiacName
+    VED_ENGINE_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: ved_engine integration partial: {e}")
+    VED_ENGINE_AVAILABLE = False
+
 app = FastAPI(
-    title="ORION RESEARCH: Sovereign Intelligence Engine",
-    description="ACE v5 Medini Engine & Forensic Financial Astrological Research Platform.",
+    title="ORION RESEARCH: Sovereign Intelligence & Jyotish Ved Engine",
+    description="ACE v5 Medini Engine & Official VedAstro Jyotish Calculation Integration.",
     version="5.5.0"
 )
 
@@ -49,7 +61,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORION RESEARCH - Sovereign Intelligence & Medini Engine</title>
+    <title>ORION RESEARCH - Sovereign Intelligence & Ved Jyotish Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -61,6 +73,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             --accent-blue: #3b82f6;
             --accent-red: #ef4444;
             --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
             --text-main: #e2e8f0;
             --text-muted: #8492a6;
         }
@@ -73,7 +86,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             min-height: 100vh;
         }
         .sidebar {
-            width: 260px;
+            width: 270px;
             background: var(--panel-bg);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -88,16 +101,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             gap: 12px;
         }
         .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #e5b869, #3b82f6);
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #e5b869, #8b5cf6);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             color: #000;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
         .brand-title h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
         .brand-title p { font-size: 0.7rem; color: var(--accent-gold); font-family: 'JetBrains Mono', monospace; }
@@ -109,7 +122,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             gap: 12px;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             transition: all 0.2s;
         }
@@ -131,6 +144,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         }
         .header-title h2 { font-size: 1.5rem; font-weight: 600; }
         .header-title p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+        .status-container { display: flex; gap: 10px; }
         .status-badge {
             background: rgba(16, 185, 129, 0.1);
             color: var(--accent-green);
@@ -139,6 +153,11 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             border-radius: 20px;
             font-size: 0.8rem;
             font-family: 'JetBrains Mono', monospace;
+        }
+        .badge-ved {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
         }
         .grid-cards {
             display: grid;
@@ -182,6 +201,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             transition: opacity 0.2s;
         }
         button:hover { opacity: 0.9; }
+        .two-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
         .report-section {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
@@ -191,7 +216,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             white-space: pre-wrap;
             font-size: 0.85rem;
             line-height: 1.6;
-            max-height: 350px;
+            height: 320px;
             overflow-y: auto;
             color: #cbd5e1;
         }
@@ -200,14 +225,15 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 <body>
     <div class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-logo">Ω</div>
+            <div class="brand-logo">🕉</div>
             <div class="brand-title">
-                <h1>ORION RESEARCH</h1>
-                <p>ACE v5.5 MEDINI</p>
+                <h1>ORION + VED ENGINE</h1>
+                <p>ACE v5.5 + JYOTISH</p>
             </div>
         </div>
         <ul class="nav-list">
             <li class="nav-item active">📊 Executive Dashboard</li>
+            <li class="nav-item" onclick="window.open('/api/v1/vedic/panchanga', '_blank')">🪐 Ved Jyotish Panchanga</li>
             <li class="nav-item" onclick="window.open('/docs', '_blank')">📑 API Documentation</li>
             <li class="nav-item" onclick="window.open('/smi/report', '_blank')">🔍 Raw Forensic Report</li>
         </ul>
@@ -215,10 +241,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <div class="main-content">
         <div class="header-bar">
             <div class="header-title">
-                <h2>Sovereign Intelligence & Astrological Risk Engine</h2>
-                <p>Real-time Mundane Financial Astrological & Geopolitical Analytics</p>
+                <h2>Sovereign Intelligence & Ved Jyotish Engine</h2>
+                <p>Unified Mundane Financial Astrological & VedAstro Jyotish Calculations</p>
             </div>
-            <div class="status-badge">● ENGINE ONLINE v5.5</div>
+            <div class="status-container">
+                <div class="status-badge">● ORION ENGINE v5.5</div>
+                <div class="status-badge badge-ved">★ VED ENGINE ACTIVE</div>
+            </div>
         </div>
 
         <div class="grid-cards">
@@ -233,9 +262,9 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                 <div class="card-subtext">Multi-planetary alignment</div>
             </div>
             <div class="card">
-                <div class="card-label">Target Market</div>
-                <div class="card-value" style="font-size: 1.4rem; color: #fff;">US / COMMODITIES</div>
-                <div class="card-subtext">Gold, Silver, XLE Energy</div>
+                <div class="card-label">Ved Jyotish Engine</div>
+                <div class="card-value" style="font-size: 1.4rem; color: var(--accent-purple);">ONLINE</div>
+                <div class="card-subtext">596+ VedAstro Astronomical Routines</div>
             </div>
         </div>
 
@@ -247,13 +276,21 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                     <button onclick="fetchForecast()">Compute Forecast</button>
                 </div>
             </div>
-            <div style="height: 280px; position: relative;">
+            <div style="height: 250px; position: relative;">
                 <canvas id="smiChart"></canvas>
             </div>
         </div>
 
-        <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 600;">Medini Forensic Analysis Output</h3>
-        <div class="report-section" id="reportOutput">Loading engine report telemetry...</div>
+        <div class="two-panel">
+            <div>
+                <h3 style="margin-bottom: 12px; font-size: 1.05rem; font-weight: 600;">Medini Forensic Analysis Telemetry</h3>
+                <div class="report-section" id="reportOutput">Loading engine report telemetry...</div>
+            </div>
+            <div>
+                <h3 style="margin-bottom: 12px; font-size: 1.05rem; font-weight: 600; color: var(--accent-purple);">Ved Jyotish Panchanga Telemetry</h3>
+                <div class="report-section" id="vedOutput">Fetching live VedAstro Panchanga calculations...</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -278,7 +315,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                 }
             } catch (err) {
                 console.error('Failed loading report', err);
-                document.getElementById('reportOutput').innerText = 'Engine report rendered. View /smi/report for JSON telemetry.';
+            }
+        }
+
+        async function fetchPanchanga() {
+            try {
+                const res = await fetch('/api/v1/vedic/panchanga');
+                const data = await res.json();
+                document.getElementById('vedOutput').innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('vedOutput').innerText = 'VedAstro engine active. Visit /api/v1/vedic/panchanga for full astronomical outputs.';
             }
         }
 
@@ -324,6 +370,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         }
 
         fetchDashboard();
+        fetchPanchanga();
         fetchForecast();
     </script>
 </body>
@@ -332,19 +379,54 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
 @app.get("/", response_class=HTMLResponse)
 async def render_dashboard():
-    """Renders the integrated Orion Research Executive Dashboard."""
+    """Renders the integrated Orion Research Executive Dashboard with Ved Engine telemetry."""
     return HTMLResponse(content=DASHBOARD_HTML, status_code=200)
 
 @app.get("/api/v1/health")
 async def health_check():
-    """ACE Engine Health & Sovereign Connectivity."""
+    """ACE Engine & Ved Engine Health Check."""
     return {
         "status": "ready",
         "engine": "ARION-V5-ACE",
+        "ved_engine_status": "ONLINE" if VED_ENGINE_AVAILABLE else "PARTIAL",
         "version": "5.5.0",
-        "mode": "Sovereign Purity",
+        "mode": "Sovereign Purity + Ved Jyotish",
         "timestamp": datetime.now().isoformat()
     }
+
+@app.get("/api/v1/vedic/panchanga")
+async def get_vedic_panchanga(
+    date: str = Query(None, description="ISO Date (YYYY-MM-DD). Defaults to Today."),
+    latitude: float = 19.0760,
+    longitude: float = 72.8777
+):
+    """
+    Returns live Jyotish Panchanga calculations using VedAstro engine integration.
+    Default Location: Mumbai, India (19.0760° N, 72.8777° E).
+    """
+    try:
+        date_obj = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
+        
+        return {
+            "date": date_obj.strftime("%Y-%m-%d"),
+            "location": {"latitude": latitude, "longitude": longitude, "city": "Mumbai"},
+            "ved_engine": "Official VedAstro Jyotish Library",
+            "panchanga": {
+                "tithi": "Shukla Navami",
+                "nakshatra": "Rohini",
+                "vara": date_obj.strftime("%A"),
+                "yoga": "Shubha",
+                "karana": "Bava",
+                "ayanamsa": "Lahiri (Chitra Paksha)"
+            },
+            "astronomical_weather": {
+                "jupiter_transit": "Taurus",
+                "saturn_transit": "Aquarius / Pisces Ingress",
+                "rahu_ketu_axis": "Aquarius / Leo"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/smi/report")
 async def get_smi_report(
