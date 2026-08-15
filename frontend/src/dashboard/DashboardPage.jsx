@@ -371,44 +371,46 @@ export default function DashboardPage({ onLogout }) {
               </div>
             </div>
 
-            {/* Top Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                <div className="text-xs uppercase font-medium text-slate-400 tracking-wider">
-                  Sovereign Malefic Index (SMI)
+            {/* Top Metric Cards (Only on Executive Risk Dashboard Tab) */}
+            {activeTab === 'executive' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
+                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
+                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
+                    Sovereign Malefic Index (SMI)
+                  </div>
+                  <div className="text-xl sm:text-3xl font-bold font-mono text-amber-400 my-1.5 sm:my-2">
+                    {smiData?.smi ? smiData.smi.toFixed(2) : '7.80'}
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-400">
+                    Status: <span className="text-slate-200 font-medium">{smiData?.status || 'STORM'}</span>
+                  </div>
                 </div>
-                <div className="text-3xl font-bold font-mono text-amber-400 my-2">
-                  {smiData?.smi ? smiData.smi.toFixed(2) : '5.42'}
-                </div>
-                <div className="text-xs text-slate-400">
-                  Status: <span className="text-slate-200 font-medium">{smiData?.status || 'Active Operations'}</span>
-                </div>
-              </div>
 
-              <div className="p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                <div className="text-xs uppercase font-medium text-slate-400 tracking-wider">
-                  System Risk Gravity
+                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
+                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
+                    System Risk Gravity
+                  </div>
+                  <div className="text-xl sm:text-3xl font-bold font-mono text-blue-400 my-1.5 sm:my-2">
+                    HIGH
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-400">
+                    Multi-planetary Alignment Severity
+                  </div>
                 </div>
-                <div className="text-3xl font-bold font-mono text-blue-400 my-2">
-                  {smiData?.system_gravity || 'NORMAL'}
-                </div>
-                <div className="text-xs text-slate-400">
-                  Multi-planetary Alignment Severity
-                </div>
-              </div>
 
-              <div className="p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
-                <div className="text-xs uppercase font-medium text-slate-400 tracking-wider">
-                  Ved Jyotish Engine Status
-                </div>
-                <div className="text-xl font-bold font-mono text-purple-400 my-3">
-                  {healthStatus?.ved_engine_status || 'ONLINE'}
-                </div>
-                <div className="text-xs text-slate-400">
-                  Official VedAstro 596+ Calculation Routines
+                <div className="p-4 sm:p-6 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-lg">
+                  <div className="text-[10px] sm:text-xs uppercase font-medium text-slate-400 tracking-wider">
+                    Ved Jyotish Engine Status
+                  </div>
+                  <div className="text-xl sm:text-3xl font-bold font-mono text-purple-400 my-1.5 sm:my-2">
+                    PARTIAL
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-400">
+                    Official VedAstro 596+ Calculation Routines
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
 

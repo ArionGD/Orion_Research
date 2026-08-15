@@ -79,19 +79,19 @@ export default function CompanyAnalysisPanel({ currentSmi = 5.5 }) {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Top Header Card */}
-      <div className="p-8 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-xl relative">
+      <div className="p-4 sm:p-8 rounded-2xl bg-[#0e131f] border border-slate-800/90 shadow-xl relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="relative z-10 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative z-10 space-y-4 sm:space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono mb-2 sm:mb-3">
                 <Building2 className="w-3.5 h-3.5" />
                 <span>NSE Stocks & Indices Dual Risk Evaluator</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
                 Corporate Natal Chart & Disaster Recipe Engine
               </h2>
               <p className="text-slate-400 text-xs mt-1 font-light max-w-2xl">
