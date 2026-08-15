@@ -15,7 +15,100 @@ import {
   Cpu
 } from 'lucide-react';
 
-// Streamed Typewriter Component matching Gemini's signature top-to-bottom text reveal
+// Rich Document & Colorful Markdown Parser for Mudra AI Responses
+function renderFormattedContent(text) {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+  return lines.map((line, lIdx) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <div key={lIdx} className="h-2" />;
+
+    // 1. Major Section Header (### or **1. ...**)
+    if (trimmed.startsWith('###') || trimmed.match(/^\*\*\d+\./) || trimmed.startsWith('####')) {
+      const headerText = trimmed.replace(/^###\s*/, '').replace(/^####\s*/, '').replace(/^\*\*/, '').replace(/\*\*:?$/, '');
+      return (
+        <div key={lIdx} className="my-3 pt-2 pb-1 border-b border-slate-800/80 flex items-center gap-2.5">
+          <span className="w-2.5 h-6 rounded-r bg-gradient-to-b from-amber-400 to-purple-500 shadow-md shadow-amber-400/20" />
+          <h3 className="text-sm font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-purple-300 tracking-wide uppercase font-mono">
+            {headerText}
+          </h3>
+        </div>
+      );
+    }
+
+    // 2. Bullet Card / List Item (* or -)
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.match(/^\*\s+\*\*/)) {
+      const content = trimmed.replace(/^[\*\-]\s+/, '');
+      return (
+        <div key={lIdx} className="my-1.5 ml-2 pl-3 border-l-2 border-amber-500/40 bg-[#0b0e17]/60 hover:bg-[#0f1422] p-2.5 rounded-r-xl transition-all border border-r border-t border-b border-slate-800/60 shadow-sm flex items-start gap-2.5">
+          <span className="text-amber-400 text-xs mt-0.5 shrink-0">✦</span>
+          <div className="flex-1 leading-relaxed text-xs text-slate-200">
+            {parseInlineStyles(content)}
+          </div>
+        </div>
+      );
+    }
+
+    // 3. Regular Paragraph
+    return (
+      <p key={lIdx} className="my-1.5 leading-relaxed text-xs text-slate-300">
+        {parseInlineStyles(trimmed)}
+      </p>
+    );
+  });
+}
+
+// Inline Style Parser for **bold**, `code`, and colorful metrics
+function parseInlineStyles(str) {
+  if (!str) return str;
+  
+  // Split by code blocks first `...`
+  const codeParts = str.split(/(`[^`]+`)/g);
+  return codeParts.map((part, i) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      const code = part.slice(1, -1);
+      return (
+        <span key={i} className="mx-1 px-2 py-0.5 rounded-md bg-[#090d16] text-emerald-300 font-mono text-[11px] border border-emerald-500/30 shadow-inner inline-block">
+          {code}
+        </span>
+      );
+    }
+
+    // Split by bold **...**
+    const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+    return boldParts.map((bPart, j) => {
+      if (bPart.startsWith('**') && bPart.endsWith('**')) {
+        const bText = bPart.slice(2, -2);
+        
+        // Highlight specific metrics colorfully
+        if (bText.includes('SMI') || bText.includes('7.8') || bText.includes('STORM')) {
+          return (
+            <span key={j} className="mx-0.5 px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 font-bold border border-red-500/30 text-[11px]">
+              {bText}
+            </span>
+          );
+        }
+        if (bText.includes('Jupiter') || bText.includes('Saturn') || bText.includes('Rahu') || bText.includes('Eclipse')) {
+          return (
+            <span key={j} className="mx-0.5 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold border border-purple-500/30 text-[11px]">
+              {bText}
+            </span>
+          );
+        }
+
+        return (
+          <strong key={j} className="font-extrabold text-amber-300 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20 shadow-sm">
+            {bText}
+          </strong>
+        );
+      }
+      return bPart;
+    });
+  });
+}
+
+// Streamed Typewriter Component matching Gemini's signature top-to-bottom text reveal with Rich Document Editor Styling
 function StreamedText({ fullText, onUpdate }) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -25,8 +118,8 @@ function StreamedText({ fullText, onUpdate }) {
     setDisplayedText('');
     setIsTyping(true);
 
-    const speed = 10; // ms per tick
-    const chunkSize = 4; // characters per tick for smooth natural streaming
+    const speed = 8; // ms per tick
+    const chunkSize = 6; // characters per tick
 
     const timer = setInterval(() => {
       index += chunkSize;
@@ -44,8 +137,8 @@ function StreamedText({ fullText, onUpdate }) {
   }, [fullText]);
 
   return (
-    <div className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-slate-200 transition-all duration-300">
-      {displayedText}
+    <div className="font-sans text-xs leading-relaxed text-slate-200 transition-all duration-300 space-y-1">
+      {renderFormattedContent(displayedText)}
       {isTyping && (
         <span className="inline-block w-2 h-4 ml-1 bg-amber-400 animate-pulse rounded-sm align-middle shadow-sm shadow-amber-400" />
       )}
